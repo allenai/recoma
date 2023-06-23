@@ -1,0 +1,16 @@
+# Editor specific
+*.iml
+.idea/
+.vscode
+
+# Python specific
+*.pyc
+
+# Output dumps
+output/
+
+# ViM Specific
+**/*.swp
+
+#Macos
+**/.DS_Store

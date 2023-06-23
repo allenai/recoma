@@ -1,0 +1,29 @@
+Q: What is the difference between 21 and 24?
+A: 3
+
+Q: What is the difference between 22-yards and ten yards?
+A: 12
+
+Q: If the Italians form 18% of the population and Germans form 12% of the population, which is the larger group?
+A: Italians
+
+Q: If Elizabeth I died on Oct 8, 1541 and all of Ireland was under English control on Oct 6, 1641, which event happened first?
+A: Elizabeth I died
+
+Q: What is the difference in years between 1903 and 1923?
+A: 20
+
+Q: What is the difference in days between Jan 5, 1996 and Jan 15th?
+A: 10
+
+Q: How many items in ["20-yard", "3-yard", "5-yard FG"]?
+A: 3
+
+Q: What is the largest value in ["20-yard", "3-yard", "thirty yards"]?
+A: 30
+
+Q: What is the largest item in ["20-yard", "3-yard", "twenty five yards"]?
+A: twenty five yards
+
+Q: {{ input_str }}
+A:
