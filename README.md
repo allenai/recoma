@@ -4,10 +4,10 @@
 Table of Contents
 ===============
 
-* [Setup] (#Setup)
-* [Running Demo Mode] (#Demo)
-* [Running Batch Inference] (#Inference)
-* [Defining New Agents] (#New-Agents)
+* [Setup](#Setup)
+* [Running Demo Mode](#Demo)
+* [Running Batch Inference](#Inference)
+* [Defining New Agents](#New-Agents)
 
 
 ## Setup
