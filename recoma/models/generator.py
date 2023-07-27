@@ -1,4 +1,5 @@
 from dataclasses import dataclass, field
+from typing import Any
 
 from recoma.utils.class_utils import RegistrableFromDict
 
@@ -21,6 +22,7 @@ class GeneratorParams:
 class GenerationOutputs:
     outputs: list[str]
     scores: list[float] = field(default_factory=lambda: [])
+    metadata: list[dict[str, Any]] = field(default_factory=lambda: [])
 
 
 class LMGenerator(RegistrableFromDict):

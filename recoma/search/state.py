@@ -1,4 +1,4 @@
-from typing import Optional
+from typing import Optional, Any
 
 from treelib import Tree, Node
 
@@ -7,8 +7,8 @@ from recoma.models.generator import GenerationOutputs
 
 
 class SearchNode(Node):
-    def __init__(self, input_str: str, target_model: str,
-                 is_open: bool = True, output: str = None, metadata={}):
+    def __init__(self, input_str: str, target_model: str, input_str_for_display=None,
+                 is_open: bool = True, output: str = None, data={}):
         """
         Node in the SearchState tree
         :param input_str: Input string provided by the parent
@@ -16,14 +16,13 @@ class SearchNode(Node):
         :param target_model: Which model should be assigned?
         :param output: Generated output using the target_model
         """
-        super().__init__()
+        super().__init__(data=data)
         self._is_open = is_open
         self.target = target_model
         self.output = output
         self.input_str = input_str
+        self.input_str_for_display = input_str_for_display
         self._tag = None
-        # print("Metadata for " + input_str + " reset to " + str(metadata))
-        self.metadata = metadata
 
     def is_open(self):
         return self._is_open
@@ -32,8 +31,13 @@ class SearchNode(Node):
         return self.target
 
     def close(self, output):
+        # print("CLOSING!!" + str(self.tag) + "\n" + str(output))
+        # input("Wait")
         self._is_open = False
         self.output = output
+
+    def set_tag(self, tag):
+        self._tag = tag
 
     @property
     def tag(self):
@@ -42,25 +46,26 @@ class SearchNode(Node):
         label = ""
         if self.is_open():
             label += "*"
-        label += "[" + self.target + "] " + self.input_str + " ➡ " + \
+        display_str = self.input_str_for_display or self.input_str
+        label += "[" + self.target + "] " + display_str + " ➡ " + \
                  (self.output if self.output is not None else "...")
         return label
 
     def add_input_output_prompt(self, input_str: str, output: GenerationOutputs):
-        if "prompts" not in self.metadata:
-            self.metadata["prompts"] = []
+        if "prompts" not in self.data:
+            self.data["prompts"] = []
         # else:
         #     print("Current metadata: " + str(self.metadata["prompts"][0][1]))
         # print("Adding " + str([x for x in output.outputs]))
-        self.metadata["prompts"].append((
+        self.data["prompts"].append((
             input_str,
             [x for x in output.outputs]
         ))
 
     def get_input_output_prompts(self):
         output = ""
-        if "prompts" in self.metadata:
-            for input_str, output_strs in self.metadata["prompts"]:
+        if "prompts" in self.data:
+            for input_str, output_strs in self.data["prompts"]:
                 output += "Input:\n" + input_str + "\n     ==>\n"
                 for output_str in output_strs:
                     output += "\tOutput: " + output_str + "\n"
@@ -88,7 +93,9 @@ class SearchState(Tree):
 
     def get_depth_first_open_node(self) -> Optional[SearchNode]:
         for node_id in self.postorder_traversal():
+            # print(self[node_id].tag)
             if node_id is not None and self[node_id].is_open():
+                # print("Found node_id: " + str(node_id))
                 return self[node_id]
         return None
 
@@ -123,6 +130,18 @@ class SearchState(Tree):
         """
         return self.is_branch(parent_id)
 
+    def add_next_step(self, next_step_input: str,
+                      next_step_model: str,
+                      current_step_node: SearchNode,
+                      next_step_input_for_display: str = None,
+                      metadata: dict[str, Any] = {}):
+        new_node = SearchNode(input_str=next_step_input,
+                              target_model=next_step_model,
+                              input_str_for_display=next_step_input_for_display,
+                              data=metadata)
+        self.add_node(new_node, parent=current_step_node)
+        return new_node
+
     def postorder_traversal(self):
         node_stack = [self.root]
         # for debugging, to remove
@@ -130,6 +149,7 @@ class SearchState(Tree):
         while len(node_stack):
             popped_id = node_stack.pop()
             children_ids = self.get_children_ids(popped_id)
+            # print(children_ids)
             if children_ids:
                 assert popped_id not in popped_nids, self.nodes[popped_id].tag
                 node_stack.append(popped_id)
@@ -137,13 +157,14 @@ class SearchState(Tree):
                     assert child not in popped_nids, self.nodes[child].tag
                 node_stack.extend(reversed(children_ids))
             else:
+                # print("Popped! " + popped_id)
                 yield popped_id
                 popped_nids.add(popped_id)
                 if len(node_stack) == 0:
                     break
                 curr_children = self.get_children_ids(node_stack[-1])
                 if len(curr_children) == 0:
-                    break
+                    continue
                 right_most_child = curr_children[-1]
                 while right_most_child == popped_id:
                     popped_id = node_stack.pop()

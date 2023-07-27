@@ -19,3 +19,23 @@ class TailOutputAnswerer(AnswerFromState):
 
     def generate_answer(self, state: SearchState):
         return state.get_depth_nth_node(self.n_tail).output
+
+
+@AnswerFromState.register("root")
+class RootAnswerer(AnswerFromState):
+
+    def __init__(self):
+        super().__init__()
+
+    def generate_answer(self, state: SearchState):
+        return state[state.root].output
+
+
+@AnswerFromState.register("alf_reward")
+class AlfRewardAnswerer(AnswerFromState):
+
+    def __init__(self):
+        super().__init__()
+
+    def generate_answer(self, state: SearchState):
+        return "SUCCESS" if state.get_depth_nth_node(-2).data["reward"][0] else "FAILURE"

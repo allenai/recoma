@@ -116,11 +116,13 @@ def inference_mode(args, configurable_systems: ConfigurableSystems):
         Path(args.output_dir + "/prompts_dump").mkdir(parents=True, exist_ok=True)
     for ex in example_predictions:
         with open(args.output_dir + "/tree_dump/" + ex.example.qid + ".json", "w") as output_fp:
-            output_fp.write(ex.final_state.to_json_tree())
+            if ex.final_state:
+                output_fp.write(ex.final_state.to_json_tree())
         if args.dump_prompts:
             with open(args.output_dir + "/prompts_dump/" + ex.example.qid + "_prompts.txt",
                       "w") as output_fp:
-                output_fp.write(ex.final_state.all_input_output_prompts())
+                if ex.final_state:
+                    output_fp.write(ex.final_state.all_input_output_prompts())
     with open(args.output_dir + "/predictions.json", "w") as output_fp:
         prediction_dump = {}
         for x in example_predictions:
