@@ -1,0 +1,104 @@
+QC: You are in the middle of a room. Looking quickly around you, you see a cabinet 4, a cabinet 3, a cabinet 2, a cabinet 1, a countertop 1, a garbagecan 1, a handtowelholder 2, a handtowelholder 1, a sinkbasin 2, a sinkbasin 1, a toilet 1, a toiletpaperhanger 1, and a towelholder 1.
+Your task is to: put some spraybottle on toilet.
+> think: To solve the task, I need to find and take a sparybottle, then put it on toilet.
+OK.
+> think: First I need to find a spraybottle. A spraybottle is more likely to appear in cabinet (1-4), countertop (1), toilet (1), sinkbasin (1-2), garbagecan (1). I can check one by one, starting with cabinet 1.
+OK.
+> go to cabinet 1
+On the cabinet 1, you see a cloth 1, a soapbar 1, a soapbottle 1.
+> go to cabinet 2
+The cabinet 2 is closed.
+> open cabinet 2
+You open the cabinet 2. The cabinet 2 is open. In it, you see a candle 1, and a spraybottle 2.
+> think: Now I find a spraybottle (2). Next, I need to take it.
+> take spraybottle 2 from cabinet 2
+You pick up the spraybottle 2 from the cabinet 2.
+> think: Now I take a spraybottle (2). Next, I need to put it in/on toilet 1.
+OK.
+> go to toilet 1
+On the toilet 1, you see a soapbottle 2.
+> put spraybottle 2 in/on toilet 1
+You put the spraybottle 2 in/on the toilet 1.
+> think: [EOQ]
+
+
+QC: You are in the middle of a room. Looking quickly around you, you see a cabinet 4, a cabinet 3, a cabinet 2, a cabinet 1, a coffeemachine 1, a countertop 1, a diningtable 3, a diningtable 2, a diningtable 1, a drawer 1, a fridge 1, a garbagecan 1, a microwave 1, a sidetable 1, a sinkbasin 1, a stoveburner 4, a stoveburner 3, a stoveburner 2, a stoveburner 1, and a toaster 1.
+Your task is to: find some apple and put it in sidetable.
+> think: To solve the task, I need to find and take an apple, then put it in sidetable.
+OK.
+> think: First I need to find an apple. An apple is more likely to appear in fridges (1), diningtables (1-3), sidetables (1), countertops (1), sinkbasins (1), garbagecan (1). I can check one by one, starting with fridge 1.
+OK.
+> go to fridge 1
+The fridge 1 is closed.
+> open fridge 1
+You open the fridge 1. The fridge 1 is open. In it, you see a lettuce 2, a mug 2, a potato 2, and a tomato 1.
+> go to diningtable 1
+On the diningtable 1, you see nothing.
+> go to diningtable 2
+On the diningtable 2, you see a pineapple 1.
+> go to diningtable 3
+On the diningtable 3, you see a bowl 2, a bowl 1, a bread 2, and a bread 1.
+> go to sidetable 1
+On the sidetable 1, you see a cup 1, a lettuce 1, a peppershaker 3, a potato 1, and a saltshaker 1.
+> go to countertop 1
+On the countertop 1, you see a butterknife 1, a dishsponge 1, and a soapbottle 1.
+> go to sinkbasin 1
+On the sinkbasin 1, you see a cup 2, a egg 1, a mug 1, and a potato 3.
+> go to garbagecan 1
+On the garbagecan 1, you see a apple 3, and a egg 3.
+> think: Now I find an apple (3). Next, I need to take it.
+> take apple 3 from garbagecan 1
+You pick up the apple 3 from the garbagecan 1.
+> think: Now I find an apple (3). Next, I need to put it in/on sidetable 1.
+OK.
+> go to sidetable 1
+On the sidetable 1, you see a cup 1, a lettuce 1, a peppershaker 3, a potato 1, and a saltshaker 1.
+> put apple 3 in/on sidetable 1
+You put the apple 3 in/on the sidetable 1.
+> think: [EOQ]
+
+QC: You are in the middle of a room. Looking quickly around you, you see a bathtubbasin 1, a cabinet 4, a cabinet 3, a cabinet 2, a cabinet 1, a countertop 1, a drawer 4, a drawer 3, a drawer 2, a drawer 1, a dresser 1, a garbagecan 1, a handtowelholder 1, a sinkbasin 2, a sinkbasin 1, a toilet 1, a toiletpaperhanger 1, and a towelholder 1.
+Your task is to: put a soapbottle in garbagecan.
+> think: To solve the task, I need to find and take a soapbottle, and put it in garbagecan.
+OK.
+> think: First I need to find a soapbottle. A soapbottle is more likely to appear in toilet (1), sinkbasin (1-2), bathtubbasin (1), cabinet (1-4), countertop (1), dresser (1), drawer (1-4), garbagecan (1). I can check one by one, starting with toilet 1.
+OK.
+> go to toilet 1
+On the toilet 1, you see nothing.
+> go to sinkbasin 1
+On the sinkbasin 1, you see nothing.
+> go to sinkbasin 2
+On the sinkbasin 2, you see nothing.
+> go to bathtubbasin 1
+On the bathtubbasin 1, you see a cloth 2.
+> go to cabinet 1
+The cabinet 1 is closed.
+> open cabinet 1
+You open the cabinet 1. The cabinet 1 is open. In it, you see nothing.
+> go to cabinet 2
+The cabinet 2 is closed.
+> open cabinet 2
+You open the cabinet 2. The cabinet 2 is open. In it, you see nothing.
+> go to cabinet 3
+The cabinet 3 is closed.
+> open cabinet 3
+You open the cabinet 3. The cabinet 3 is open. In it, you see a toiletpaper 2.
+> go to cabinet 4
+The cabinet 4 is closed.
+> open cabinet 4
+You open the cabinet 4. The cabinet 4 is open. In it, you see a spraybottle 2.
+> go to countertop 1
+On the countertop 1, you see a soapbottle 2, and a spraybottle 1.
+> think: Now I find a soapbottle (2). Next, I need to take it.
+OK.
+> take soapbottle 2 from countertop 1
+You pick up the soapbottle 2 from the countertop 1.
+> think: Now I take a soapbottle (2). Next, I need to put it in/on garbagecan 1.
+OK.
+> go to garbagecan 1
+On the garbagecan 1, you see nothing.
+> put soapbottle 2 in/on garbagecan 1
+You put the soapbottle 2 in/on the garbagecan 1.
+> think: [EOQ]
+
+QC: {{ input_str }}
