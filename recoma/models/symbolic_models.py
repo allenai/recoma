@@ -74,7 +74,7 @@ class ReactController(BaseModel):
     def __init__(self, react_model, action_model,
                  action_prefix="Action:", thought_prefix="Thought:",
                  obs_prefix="Observation:", eoq_string="[EOQ]", skip_thought_step=False,
-                 obs_str_for_think="OK.", **kwargs):
+                 obs_str_for_think="OK.", max_steps=50, **kwargs):
         super().__init__(**kwargs)
         self.action_prefix = action_prefix
         self.thought_prefix = thought_prefix
@@ -84,6 +84,7 @@ class ReactController(BaseModel):
         self.action_model = action_model
         self.skip_thought_step = skip_thought_step
         self.obs_str_for_think = obs_str_for_think
+        self.max_steps = max_steps
 
     def next_step(self, curr_step):
         return (curr_step + 1) % self.NUM_STEPS
@@ -123,8 +124,8 @@ class ReactController(BaseModel):
             last_step = last_child.data["react"]["step"]
             # If the previous step was a thought step
             if last_step == self.THOUGHT:
-                # If the task is complete, return the answer
-                if last_child.output == self.eoq_string:
+                # If the task is complete OR max_steps hit, return the answer
+                if last_child.output == self.eoq_string or len(children) >= self.max_steps:
                     if len(children) < 2:
                         logger.error("{} generated before any reasoning was performed.\n Trace: {}"
                                      "\nReturning no answer".format(self.eoq_string,
@@ -148,7 +149,7 @@ class ReactController(BaseModel):
                 # if action starts with think:, handle it like a think step.
                 if next_input_str.startswith("think:"):
                     # reasoning complete
-                    if next_input_str.endswith(self.eoq_string):
+                    if next_input_str.endswith(self.eoq_string) or len(children) >= self.max_steps:
                         answer = children[-1].output
                         current_node.close(output=answer)
                     else:
@@ -184,6 +185,10 @@ class ReactController(BaseModel):
                                             current_step_node=current_node)
 
             elif last_step == self.OBSERVATION:
+                if len(children) >= self.max_steps:
+                    answer = "Task Failed!"
+                    current_node.close(output=answer)
+                    return [new_state]
                 # Generate thought/action next
                 if self.skip_thought_step:
                     next_step = self.ACTION

@@ -1,4 +1,5 @@
 from recoma.search.state import SearchState
+from recoma.alfworld.alf_utils import get_reward
 from recoma.utils.class_utils import RegistrableFromDict
 
 
@@ -38,4 +39,4 @@ class AlfRewardAnswerer(AnswerFromState):
         super().__init__()
 
     def generate_answer(self, state: SearchState):
-        return "SUCCESS" if state.get_depth_nth_node(-2).data["reward"][0] else "FAILURE"
+        return "SUCCESS" if get_reward(state.get_depth_nth_node(-2).data) else "FAILURE"

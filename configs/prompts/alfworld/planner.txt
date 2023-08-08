@@ -1,0 +1,51 @@
+You are in the middle of a room. Looking quickly around you, you see a cabinet 6, a cabinet 5, a cabinet 4, a cabinet 3, a cabinet 2, a cabinet 1, a coffeemachine 1, a countertop 3, a countertop 2, a countertop 1, a drawer 3, a drawer 2, a drawer 1, a fridge 1, a garbagecan 1, a microwave 1, a shelf 3, a shelf 2, a shelf 1, a sinkbasin 1, a stoveburner 4, a stoveburner 3, a stoveburner 2, a stoveburner 1, and a toaster 1.
+Your task is to: put a saltshaker in drawer.
+Come up with an abstract plan to perform this task in a couple of steps.
+# Think: To perform this task, I need to find and take saltshaker and then put it in drawer. First, I will focus on finding saltshaker.
+Step 1: Find and take saltshaker
+# Think: Now that I have found and taken saltshaker. I will focus on putting it in/on drawer.
+Step 2: Put saltshaker in/on drawer
+Logic: AND
+
+You are in the middle of a room. Looking quickly around you, you see a cabinet 6, a cabinet 5, a cabinet 4, a cabinet 3, a cabinet 2, a cabinet 1, a coffeemachine 1, a countertop 3, a countertop 2, a countertop 1, a drawer 3, a drawer 2, a drawer 1, a fridge 1, a garbagecan 1, a microwave 1, a shelf 3, a shelf 2, a shelf 1, a sinkbasin 1, a stoveburner 4, a stoveburner 3, a stoveburner 2, a stoveburner 1, and a toaster 1. Your task is to: find and take a saltshaker.
+Come up with an abstract plan to perform this task in a couple of steps.
+# Think: To perform this task I need to find saltshaker in the room. Saltshaker is likely to be in cabinets or drawer or countertop or shelves. Now I will focus on finding saltshaker in each of these locations one by one.
+Step 1: Find and take saltshaker in cabinet
+Step 2: Find and take saltshaker in drawer
+Step 3: Find and take saltshaker in countertop
+Step 4: Find and take saltshaker in shelves
+Logic: OR
+
+You are in the middle of a room. Looking quickly around you, you see a cabinet 6, a cabinet 5, a cabinet 4, a cabinet 3, a cabinet 2, a cabinet 1, a coffeemachine 1, a countertop 3, a countertop 2, a countertop 1, a drawer 3, a drawer 2, a drawer 1, a fridge 1, a garbagecan 1, a microwave 1, a shelf 3, a shelf 2, a shelf 1, a sinkbasin 1, a stoveburner 4, a stoveburner 3, a stoveburner 2, a stoveburner 1, and a toaster 1. Your task is to: heat apple and put on a countertop.
+Come up with an abstract plan to perform this task in a couple of steps.
+# Think: To perform this task, I need to find and take apple, heat it, and then put it on countertop. First, I will focus on finding apple.
+Step 1: Find and take apple
+# Think: Now that I have found and taken apple, I will focus on heating it.
+Step 2: Heat apple
+# Think: Now that I have heated apple, I will focus on putting it in/on countertop.
+Step 3: Put apple in/on countertop
+Logic: AND
+
+You are in the middle of a room. Looking quickly around you, you see a cabinet 6, a cabinet 5, a cabinet 4, a cabinet 3, a cabinet 2, a cabinet 1, a coffeemachine 1, a countertop 3, a countertop 2, a countertop 1, a drawer 3, a drawer 2, a drawer 1, a fridge 1, a garbagecan 1, a microwave 1, a shelf 3, a shelf 2, a shelf 1, a sinkbasin 1, a stoveburner 4, a stoveburner 3, a stoveburner 2, a stoveburner 1, and a toaster 1. Your task is to: put a clean mug in coffeemachine.
+Come up with an abstract plan to perform this task in a couple of steps.
+# Think: To perform this task, I need to find and take mug, clean it, and then put it in coffeemachine. First, I will focus on finding mug.
+Step 1: Find and take mug
+# Think: Now that I have found a mug, I will focus on cleaning it.
+Step 2: Clean the mug
+# Think: Now that I have cleaned the mug, I will focus on putting it in coffeemachine.
+Step 3: Put mug in coffeemachine
+Logic: AND
+
+You are in the middle of a room. Looking quickly around you, you see a cabinet 6, a cabinet 5, a cabinet 4, a cabinet 3, a cabinet 2, a cabinet 1, a coffeemachine 1, a countertop 3, a countertop 2, a countertop 1, a drawer 3, a drawer 2, a drawer 1, a fridge 1, a garbagecan 1, a microwave 1, a shelf 3, a shelf 2, a shelf 1, a sinkbasin 1, a stoveburner 4, a stoveburner 3, a stoveburner 2, a stoveburner 1, and a toaster 1. Your task is to: find and take a saltshaker in cabinet.
+Come up with an abstract plan to perform this task in a couple of steps.
+# Think: To perform this task I need to find saltshaker in cabinets. There are multiple cabinets in the room: cabinet 6, a cabinet 5, a cabinet 4, a cabinet 3, a cabinet 2, a cabinet 1. I will try finding saltshaker in each of these locations one by one.
+Step 1: Find and take saltshaker in cabinet 6
+Step 2: Find and take saltshaker in cabinet 5
+Step 3: Find and take saltshaker in cabinet 4
+Step 4: Find and take saltshaker in cabinet 3
+Step 5: Find and take saltshaker in cabinet 2
+Step 6: Find and take saltshaker in cabinet 1
+Logic: OR
+
+{{ input_str }}
+Come up with an abstract plan to perform this task in a couple of steps.

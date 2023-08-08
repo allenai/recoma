@@ -47,8 +47,10 @@ class SearchNode(Node):
         if self.is_open():
             label += "*"
         display_str = self.input_str_for_display or self.input_str
-        label += "[" + self.target + "] " + display_str + " ➡ " + \
-                 (self.output if self.output is not None else "...")
+        if self.output:
+            label += "[" + self.target + "] " + self.output
+        else:
+            label += "[" + self.target + "] " + display_str + " => ... "
         return label
 
     def add_input_output_prompt(self, input_str: str, output: GenerationOutputs):
@@ -129,6 +131,9 @@ class SearchState(Tree):
         :return: list of children node ids (ordered left-to-right)
         """
         return self.is_branch(parent_id)
+
+    def get_children(self, parent_node: SearchNode):
+        return [self.get_node(nid) for nid in self.get_children_ids(parent_node.identifier)]
 
     def add_next_step(self, next_step_input: str,
                       next_step_model: str,

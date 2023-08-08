@@ -30,6 +30,7 @@ local generator_params = import "../common/default_gpt_davinci002.libsonnet";
     },
     "search": {
         "type": "best_first",
+        "max_search_iters": 200,
         "start_model": "alf_init",
         "answerer": {
             "type": "alf_reward"

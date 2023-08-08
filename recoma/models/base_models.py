@@ -1,7 +1,7 @@
 from typing import Optional, List
 
 from recoma.models.generator import GenerationOutputs
-from recoma.search.state import SearchNode, SearchState
+from recoma.search.state import SearchState
 from recoma.utils.class_utils import RegistrableFromDict
 
 
@@ -16,7 +16,7 @@ class BaseModel(RegistrableFromDict):
         return new_states
 
     def generate_output(self, state: SearchState) -> GenerationOutputs:
-        raise NotImplementedError
+        return None
 
     def build_new_states(self, state: SearchState,
                          generation_outputs: GenerationOutputs) -> List[SearchState]:

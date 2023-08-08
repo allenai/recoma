@@ -4,7 +4,6 @@ from dataclasses import dataclass
 
 from recoma.datasets.reader import Example
 from recoma.search.answerfromstate import TailOutputAnswerer, AnswerFromState
-from recoma.search.state import SearchNode
 from recoma.search.state import SearchState
 from recoma.utils.class_utils import RegistrableFromDict
 
@@ -20,6 +19,7 @@ class ExamplePrediction:
 
 class SearchAlgo(RegistrableFromDict):
     def __init__(self, controller, start_model, answerer=None, max_search_iters=100,
+
                  **kwargs):
         super().__init__(**kwargs)
         self.controller = controller
