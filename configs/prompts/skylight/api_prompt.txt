@@ -1,0 +1,59 @@
+You have access to the following APIs:
+
+GET /api/event: Get information about events
+Query params:
+    aoiId: AOI ID
+    countryCodesExclude:Country codes to exclude
+    countryCodes: Country codes to include
+    startTime: start time of events in ISO format
+    endTime: end time of events in ISO format
+    eventId: Event identifier
+    vesselId: Vessel identifier
+    trackId: Track identifier
+    vesselCategory: vessel category
+    detectionType: type of method used to detect this event. Valid values: [ais_correlated, dark]
+    eventTypes: event type. Valid values: [dark_rendezvous, detection, fishing_activity_history, speed_range, standard_rendezvous, aoi_visit, dark_activity, viirs, sar_sentinel1]
+    detectionSource: detection source
+
+GET /api/track_by_vessel_id: Get information about track segments for a vessel
+Query Params:
+    vessel_id: Vessel identifier
+    startTime: start time of events in ISO format
+    endTime: end time of events in ISO format
+
+GET /api/tracks_v2: Get information about a track
+Query Params:
+    track_id: Track identifier
+    startTime: start time of events in ISO format
+    endTime: end time of events in ISO format
+
+GET /api/vessel/track/<track_id>: Get information about a trackid
+
+GET /api/aois: Get all AOIs associated with the active user login
+Query Params:
+    format:
+    prefer_original_geometry:
+    max_results:
+
+GET /api/aoi/<AOI_id>: Get a specific AOI by ID
+Query Params:
+    prefer_original_geometry
+
+Today's date and time is: {{ input_date_time_str }}
+
+These APIs can be used to answer questions. E.g. to answer the question
+
+Q: Which events happened in the area ID 1188f56b-082b-4b38-a230-a4295e400f3e from Colombia?
+A: api/event?aoiId=1188f56b-082b-4b38-a230-a4295e400f3e&countryCodes=COL
+
+Q: Which dark rendezvous events happened in the area ID 1188f56b-082b-4b38-a230-a4295e400f3e ?
+A: api/event?aoiId=1188f56b-082b-4b38-a230-a4295e400f3e&eventTypes=dark_rendezvous
+
+Q: What are my AOI IDs?
+A: api/aois
+
+Q: Which events happened in the area ID 1188f56b-082b-4b38-a230-a4295e400f3e between Aug 9 2023 and Aug 10 2023?
+A: api/event?aoiId=1188f56b-082b-4b38-a230-a4295e400f3e&startTime=2023-08-09&endTime=2023-08-10
+
+Q: {{input_str}}
+A:

@@ -19,7 +19,6 @@ class ClientAPIModel(BaseModel):
         r = requests.get('http://{}:{}/{}'.format(self.host, self.port, self.path),
                          params=input_params)
         logger.debug("Requesting: {}".format(r.url))
-        print(r.text)
         return r.text
 
 

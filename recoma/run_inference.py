@@ -11,6 +11,8 @@ from recoma.datasets.reader import Example, DatasetReader
 from recoma.models.base_models import BaseModel
 from recoma.search.search import SearchAlgo
 from recoma.utils.env_utils import get_environment_variables
+# TODO Fix this. Shouldn't need to be imported here.
+import recoma.skylight
 
 logger = logging.getLogger(__name__)
 
@@ -87,8 +89,8 @@ def demo_mode(args, configurable_systems: ConfigurableSystems):
         predictions = search_algo.predict(example=example)
         if args.dump_prompts:
             print(predictions.final_state.all_input_output_prompts())
-        print(predictions.example.question)
-        print(predictions.prediction)
+        print("QUESTION: " + predictions.example.question)
+        print("ANSWER: " + predictions.prediction)
         print(predictions.final_state.to_str_tree())
 
 

@@ -1,6 +1,6 @@
 import logging
 from typing import Any
-
+from datetime import datetime
 from jinja2 import Template
 
 from recoma.models.base_models import BaseModel, PromptedModel
@@ -37,7 +37,8 @@ class PromptedLMModel(PromptedModel):
         return {
             "input_str": input_str,
             "paras": state.example.paras,
-            "question": state.example.question
+            "question": state.example.question,
+            "input_date_time_str": datetime.now()
         }
 
     def generate_output(self, state) -> GenerationOutputs:
