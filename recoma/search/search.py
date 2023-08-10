@@ -19,17 +19,21 @@ class ExamplePrediction:
 
 class SearchAlgo(RegistrableFromDict):
     def __init__(self, controller, start_model, answerer=None, max_search_iters=100,
-
-                 **kwargs):
+                 output_dir=None, **kwargs):
         super().__init__(**kwargs)
         self.controller = controller
         self.answerer = TailOutputAnswerer() if answerer is None \
             else AnswerFromState.from_dict(answerer)
         self.start_model = start_model
         self.max_search_iters = max_search_iters
+        self.output_dir = output_dir
 
     def predict(self, example: Example) -> ExamplePrediction:
         return NotImplementedError
+
+
+def clean_name(qid):
+    return qid.replace("/", "_").replace("\\", "_").replace(".", "_")
 
 
 @SearchAlgo.register("best_first")
@@ -57,7 +61,9 @@ class BestFirstSearch(SearchAlgo):
             # pop from heap
             current_state = heapq.heappop(heap)
             logger.debug("\n" + current_state.to_str_tree())
-
+            if self.output_dir:
+                with open(clean_name(example.qid) + ".html", "w") as fp:
+                    fp.write(current_state.to_html_tree())
             if not current_state.has_open_node():
                 # found a solution
                 answer = self.answerer.generate_answer(current_state)

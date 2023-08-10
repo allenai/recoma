@@ -39,7 +39,7 @@ def parse_arguments():
     return arg_parser.parse_args()
 
 
-def build_configurable_systems(config_file):
+def build_configurable_systems(config_file, output_dir):
     if config_file.endswith(".jsonnet"):
         ext_vars = get_environment_variables()
         logger.info("Parsing config with external variables: {}".format(ext_vars))
@@ -57,7 +57,8 @@ def build_configurable_systems(config_file):
         model_map[k] = BaseModel.from_dict(v)
     controller = Controller(model_list=model_map)
 
-    search = SearchAlgo.from_dict({"controller": controller} | config_map["search"])
+    search = SearchAlgo.from_dict({"controller": controller, "output_dir": output_dir} |
+                                  config_map["search"])
     return ConfigurableSystems(source_json=source_json, reader=reader, controller=controller,
                                search=search)
 
@@ -143,7 +144,7 @@ if __name__ == "__main__":
     if parsed_args.debug:
         logging.getLogger('recoma').setLevel(level=logging.DEBUG)
 
-    config_sys = build_configurable_systems(parsed_args.config)
+    config_sys = build_configurable_systems(parsed_args.config, parsed_args.output_dir)
 
     if parsed_args.demo:
         demo_mode(args=parsed_args, configurable_systems=config_sys)

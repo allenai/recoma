@@ -53,6 +53,35 @@ class SearchNode(Node):
             label += "[" + self.target + "] " + display_str + " => ... "
         return label
 
+    def to_html_node(self):
+        summary = ""
+        if self._tag:
+            summary = self._tag
+        else:
+            if self.is_open():
+                summary += "*"
+            display_str = self.input_str_for_display or self.input_str
+            if self.output:
+                summary += "[" + self.target + "] " + display_str + " => " + self.output
+            else:
+                summary += "[" + self.target + "] " + display_str + " => ... "
+        details = ""
+        if "prompts" in self.data:
+            for input_str, output_strs in self.data["prompts"]:
+                details += "<b>Input:</b>\n<br>\n" + input_str.replace("\n", "<br>") + "\n<br>\n"
+                for output_str in output_strs:
+                    details += "&nbsp;<b>Output:</b>\n<br>\n" + output_str.replace("\n", "<br>") + "\n<br>\n"
+                details += "\n<hr>\n"
+        if details == "":
+            return summary
+        else:
+            return """{}
+                      <details style="margin-left: 5em;font-size: 75%;">
+                         <summary>Prompts</summary>
+                         {}
+                      </details>
+            """.format(summary, details)
+
     def add_input_output_prompt(self, input_str: str, output: GenerationOutputs):
         if "prompts" not in self.data:
             self.data["prompts"] = []
@@ -115,6 +144,31 @@ class SearchState(Tree):
 
     def to_json_tree(self) -> str:
         return self.to_json(sort=False)
+
+    def to_html_tree(self, parent=None) -> str:
+        header = ""
+        footer = ""
+        if parent is None:
+            parent = self.get_node(self.root)
+            header = """<style type="text/css">
+                          details > *:not(summary){
+                          margin-left: 2em;
+                         }
+                        </style>
+                        <html>
+            """
+            footer = "</html>"
+        children_repr = ""
+        for child in self.get_children(parent):
+            children_repr += self.to_html_tree(child) + "\n"
+
+        tree_repr = """<details>
+                      <summary>{}</summary>
+                      {}
+                   </details>
+               """.format(parent.to_html_node(),
+                          children_repr)
+        return header + tree_repr + footer
 
     def all_input_output_prompts(self) -> str:
         output_str = ""
