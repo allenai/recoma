@@ -59,12 +59,14 @@ class SearchNode(Node):
             summary = self._tag
         else:
             if self.is_open():
-                summary += "*"
+                summary += "<u>[" + self.target + "]</u> "
+            else:
+                summary += "[" + self.target + "] "
             display_str = self.input_str_for_display or self.input_str
             if self.output:
-                summary += "[" + self.target + "] " + display_str + " => " + self.output
+                summary += display_str + " => " + self.output
             else:
-                summary += "[" + self.target + "] " + display_str + " => ... "
+                summary += display_str + " => ... "
         details = ""
         if "prompts" in self.data:
             for input_str, output_strs in self.data["prompts"]:

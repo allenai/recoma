@@ -19,13 +19,14 @@ class ExamplePrediction:
 
 class SearchAlgo(RegistrableFromDict):
     def __init__(self, controller, start_model, answerer=None, max_search_iters=100,
-                 output_dir=None, **kwargs):
+                 max_search_depth=100, output_dir=None, **kwargs):
         super().__init__(**kwargs)
         self.controller = controller
         self.answerer = TailOutputAnswerer() if answerer is None \
             else AnswerFromState.from_dict(answerer)
         self.start_model = start_model
         self.max_search_iters = max_search_iters
+        self.max_search_depth = max_search_depth
         self.output_dir = output_dir
 
     def predict(self, example: Example) -> ExamplePrediction:
@@ -76,8 +77,11 @@ class BestFirstSearch(SearchAlgo):
 
             # generate new states
             for new_state in self.controller.execute(current_state):
-                # push onto heap
-                heapq.heappush(heap, new_state)
+                # push onto heap if max depth not reached
+                if new_state.depth() <= self.max_search_depth:
+                    heapq.heappush(heap, new_state)
+                else:
+                    logger.debug("!HIT MAX DEPTH!")
             iters += 1
 
         return ExamplePrediction(example=example,

@@ -1,6 +1,8 @@
 import logging
+from typing import List
 
 from recoma.models.base_models import BaseModel
+from recoma.search.state import SearchNode
 
 logger = logging.getLogger(__name__)
 
@@ -12,7 +14,7 @@ class AlfWorldExecuter(BaseModel):
     def __init__(self, react_model, action_model,
                  action_prefix=">", thought_prefix="think:",
                  obs_prefix="", eoq_string="!",
-                 obs_str_for_think="OK.", max_steps=50, **kwargs):
+                 obs_str_for_think="OK.", max_steps=50, max_no_progress_steps=5, **kwargs):
         super().__init__(**kwargs)
         self.action_prefix = action_prefix
         self.thought_prefix = thought_prefix
@@ -22,6 +24,7 @@ class AlfWorldExecuter(BaseModel):
         self.action_model = action_model
         self.obs_str_for_think = obs_str_for_think
         self.max_steps = max_steps
+        self.max_no_progress_steps = max_no_progress_steps
 
     def get_step_prefix(self, step):
         if step == self.THOUGHT:
@@ -32,6 +35,28 @@ class AlfWorldExecuter(BaseModel):
             return self.obs_prefix
         else:
             raise ValueError("Invalid step: {}".format(step))
+
+    def get_action_node_input(self, children):
+        prev_action_node = children[-2]
+        prev_obs_node = children[-1]
+        # Need to first collect the "Action: <output>" string from the prev_action_node
+        next_input_str = prev_action_node.input_str + " " + prev_action_node.output + \
+                         "\n" + self.get_step_prefix(self.OBSERVATION) + " " + \
+                         prev_obs_node.output + "\n" + self.get_step_prefix(self.ACTION)
+        return next_input_str
+
+    def no_progress(self, children: List[SearchNode]):
+        no_progress_counter = 0
+        for child in reversed(children):
+            if child.data["react"]["step"] == self.OBSERVATION:
+                if child.output == "Nothing happens.":
+                    no_progress_counter += 1
+                else:
+                    # A valid observation found.
+                    return False
+                if no_progress_counter >= self.max_no_progress_steps:
+                    return True
+        return False
 
     def __call__(self, state):
         new_state = state.clone(deep=True)
@@ -77,10 +102,8 @@ class AlfWorldExecuter(BaseModel):
 
                         # Now create an open node for the next action step
                         next_step = self.ACTION
-                        next_input_str = last_child.input_str + " " + generated_action + \
-                                         "\n" + self.get_step_prefix(self.OBSERVATION) + " " + \
-                                         self.obs_str_for_think + "\n" + \
-                                         self.get_step_prefix(next_step)
+                        next_input_str = self.get_action_node_input(
+                            children=new_state.get_children(current_node))
                         new_state.add_next_step(next_step_input=next_input_str,
                                                 next_step_model=self.react_model,
                                                 next_step_input_for_display=self.get_step_prefix(
@@ -97,20 +120,16 @@ class AlfWorldExecuter(BaseModel):
                                             current_step_node=current_node)
 
             elif last_step == self.OBSERVATION:
-                if len(children) >= self.max_steps:
+                if len(children) >= self.max_steps or self.no_progress(children):
                     answer = "Task Failed!"
                     current_node.close(output=answer)
                     return [new_state]
-                next_step = self.ACTION
-                prev_action_node = children[-2]
-                # Need to first collect the "Action: <output>" string from the prev_action_node
-                next_input_str = prev_action_node.input_str + " " + prev_action_node.output + \
-                                 "\n" + self.get_step_prefix(self.OBSERVATION) + " " + \
-                                 last_child.output + "\n" + self.get_step_prefix(next_step)
+                next_input_str = self.get_action_node_input(children)
                 new_state.add_next_step(next_step_input=next_input_str,
                                         next_step_model=self.react_model,
-                                        next_step_input_for_display=self.get_step_prefix(next_step),
-                                        metadata={"react": {"step": next_step}},
+                                        next_step_input_for_display=self.get_step_prefix(
+                                            self.ACTION),
+                                        metadata={"react": {"step": self.ACTION}},
                                         current_step_node=current_node)
             else:
                 raise ValueError("Unknown last_step: " + last_step)
