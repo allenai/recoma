@@ -62,7 +62,7 @@ class BestFirstSearch(SearchAlgo):
             current_state = heapq.heappop(heap)
             logger.debug("\n" + current_state.to_str_tree())
             if self.output_dir:
-                with open(clean_name(example.qid) + ".html", "w") as fp:
+                with open(self.output_dir + "/" + clean_name(example.qid) + ".html", "w") as fp:
                     fp.write(current_state.to_html_tree())
             if not current_state.has_open_node():
                 # found a solution

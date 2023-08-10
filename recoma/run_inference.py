@@ -67,6 +67,7 @@ def demo_mode(args, configurable_systems: ConfigurableSystems):
     qid_example_map = {}
     search_algo = configurable_systems.search
     reader = configurable_systems.reader
+    Path(args.output_dir).mkdir(parents=True, exist_ok=True)
     if args.input:
         for eg in reader.read_examples(args.input):
             qid_example_map[eg.qid] = eg
