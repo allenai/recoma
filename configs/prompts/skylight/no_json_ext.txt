@@ -19,13 +19,13 @@ Q: Which vessels appear in these events?
 A: output=get_values(json_data, key="vessel_id")
 
 Q: How many events in this json?
-A: output=length(json_data)
+A: output=len(json_data)
 
 Q: Which vessel categories appear in this json?
 A: output=get_values(json_data, key="category")
 
 Q: How many dark rendezvous events in this json?
-A: output=length([x for x in json_data if x["_source"]["event_type"] == "dark_rendezvous"])
+A: output=len([x for x in json_data if x["_source"]["event_type"] == "dark_rendezvous"])
 
 Q: {{input_str}}
 A:

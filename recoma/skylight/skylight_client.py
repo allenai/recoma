@@ -30,9 +30,9 @@ class SkylightAPIModel(BaseModel):
         logger.debug("Requesting: {}".format(r.url))
         logger.debug("Output: {}".format(r.text))
         try:
-            output_json = json.loads(r.txt)
+            output_json = json.loads(r.text)
         except JSONDecodeError:
-            logger.error("Could not parse the response: {}".format(r.txt))
+            logger.error("Could not parse the response: {}".format(r.text))
             return GenerationOutputs(outputs=[])
 
         output_json = self.clean_json(output_json)
