@@ -39,6 +39,9 @@ class SearchNode(Node):
     def set_tag(self, tag):
         self._tag = tag
 
+    def shrink_for_output(self, input_str):
+        return input_str if len(input_str) < 100 else (input_str[:30] + "..." + input_str[-10:])
+
     @property
     def tag(self):
         if self._tag:
@@ -46,9 +49,9 @@ class SearchNode(Node):
         label = ""
         if self.is_open():
             label += "*"
-        display_str = self.input_str_for_display or self.input_str
+        display_str = self.shrink_for_output(self.input_str_for_display or self.input_str)
         if self.output:
-            label += "[" + self.target + "] " + self.output
+            label += "[" + self.target + "] " + self.shrink_for_output(self.output)
         else:
             label += "[" + self.target + "] " + display_str + " => ... "
         return label
@@ -62,9 +65,9 @@ class SearchNode(Node):
                 summary += "<u>[" + self.target + "]</u> "
             else:
                 summary += "[" + self.target + "] "
-            display_str = self.input_str_for_display or self.input_str
+            display_str = self.shrink_for_output(self.input_str_for_display or self.input_str)
             if self.output:
-                summary += display_str + " => " + self.output
+                summary += display_str + " => " + self.shrink_for_output(self.output)
             else:
                 summary += display_str + " => ... "
         details = ""

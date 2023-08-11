@@ -91,7 +91,8 @@ def demo_mode(args, configurable_systems: ConfigurableSystems):
             print(predictions.final_state.all_input_output_prompts())
         print("QUESTION: " + predictions.example.question)
         print("ANSWER: " + predictions.prediction)
-        print(predictions.final_state.to_str_tree())
+        if predictions.final_state:
+            print(predictions.final_state.to_str_tree())
 
 
 def inference_mode(args, configurable_systems: ConfigurableSystems):

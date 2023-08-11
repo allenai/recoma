@@ -71,8 +71,8 @@ class DecompLMModel(PromptedLMModel):
         children: list[SearchNode] = state.children(open_node.identifier)
         subqs = []
         for idx, child in enumerate(children):
-            subq = child.input_str
-            suba = child.output
+            subq = child.data.get("generated_q") or child.input_str
+            suba = child.output if len(child.output) < 300 else (child.output[:100] + "..." + child.output[-50:])
             subqf = "Q{}".format(idx + 1) if self.use_number_format else "QS"
             subaf = "#{}".format(idx + 1) if self.use_number_format else "A"
             subqs.append({
@@ -96,6 +96,7 @@ class DecompLMModel(PromptedLMModel):
         return var_assignments
 
     def update_question_with_vars(self, input_str: str, var_assignments: dict[str, str]):
+        # input_str = input_str.replace("\\n", "\n")
         for var_id, var_val in var_assignments.items():
             input_str = input_str.replace(var_id, var_val)
         return input_str
@@ -116,7 +117,8 @@ class DecompLMModel(PromptedLMModel):
                 new_state_input_str = self.update_question_with_vars(output_str, var_assignments)
                 new_state.add_next_step(next_step_input=new_state_input_str,
                                         next_step_model=self.next_model,
-                                        current_step_node=current_node)
+                                        current_step_node=current_node,
+                                        metadata={"generated_q": output_str})
             new_states.append(new_state)
 
         return new_states

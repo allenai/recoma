@@ -1,0 +1,28 @@
+QC: What are the IDs for my areas?
+Q1: [qtoapi] What are the AOI IDs?
+A1: api/aois
+Q2: [api] #1
+A2: [{"type": "FeatureCollection", "features": [{...}]}]
+Q3: [json_ext] Which AOI IDs are in the json?
+A3: output=get_all_values(json_data, key="aoi_id")
+Q4: [executer] json_data=json.loads('#2')\n#3
+A4: ["1d9dfd89-3883-4fa3-bc6a-7de43e80ab2e", "1188f56b-082b-4b38-a230-a4295e400f3e"]
+Q5: [EOQ]
+
+QC: Which vessels have had a dark rendezvous event in 1d9dfd89-3883-4fa3-bc6a-7de43e80ab2e?
+Q1: [qtoapi] What are the dark rendezvous events in 1d9dfd89-3883-4fa3-bc6a-7de43e80ab2?
+A1: api/event?aoiId=1d9dfd89-3883-4fa3-bc6a-7de43e80ab2&eventTypes=dark_rendezvous
+Q2: [api] #1
+A2: [{"_index": "event-history", "_id":...}]
+Q3: [json_ext] Which vessel IDs are in the json?
+A3: output=get_all_values(json_data, key="vessel_id")
+Q4: [executer] json_data=json.loads('#2')\n#3
+A4: ["B:538008240:1681453756:3346683:880545", "B:228423800:1650335002:161664:697060", "B:367738980:1628926066:159334:946572"]
+Q5: [EOQ]
+
+QC: {{ input_str }}
+{% for subqa in subqas -%}
+{{ subqa.subqf }}: {{ subqa.subq }}
+{{ subqa.subaf }}: {{ subqa.suba }}
+{%- endfor %}
+{{ subqf_final }}:

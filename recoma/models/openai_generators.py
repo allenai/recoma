@@ -152,6 +152,7 @@ class GPT3ChatGenerator(LMGenerator):
             function = openai.ChatCompletion.create
 
         generator_args = generator_params_to_args(self.generator_params, is_chat_model=True)
+        # print(messages_json)
         generator_args["messages"] = messages_json
         generator_args["model"] = self.engine
         response: dict[Any, Any] = self.completion_with_backoff(

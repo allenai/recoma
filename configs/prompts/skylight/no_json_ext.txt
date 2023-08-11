@@ -1,0 +1,31 @@
+Given an input JSON in json_data, you must write Python code to extract key information.
+
+Here are some common keys that you can expect in the JSON:
+    aoi_id: AOI ID
+    display_country: Country name
+    start_time: start time of events in ISO format
+    end_time: end time of events in ISO format
+    event_id: Event identifier
+    vessel_id: Vessel identifier
+    track_id: Track identifier
+    detection_type: type of method used to detect this event. Valid values: [ais_correlated, dark]
+    event_type: event type. Valid values: [dark_rendezvous, detection, fishing_activity_history, speed_range, standard_rendezvous, aoi_visit, dark_activity, viirs, sar_sentinel1]
+    category: Vessel type/category
+    subcategory: Vessel subtype/subcategory
+
+For example:
+
+Q: Which vessels appear in these events?
+A: output=get_values(json_data, key="vessel_id")
+
+Q: How many events in this json?
+A: output=length(json_data)
+
+Q: Which vessel categories appear in this json?
+A: output=get_values(json_data, key="category")
+
+Q: How many dark rendezvous events in this json?
+A: output=length([x for x in json_data if x["_source"]["event_type"] == "dark_rendezvous"])
+
+Q: {{input_str}}
+A:

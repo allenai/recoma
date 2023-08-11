@@ -1,0 +1,125 @@
+Given an input JSON, you must write Python code to extract key information.
+
+For example:
+
+json_data = [
+  {
+    "_index": "event-history",
+    "_id": "B:150000320:1687551946:3554040:1010471:1689565109:1689573928",
+    "_score": null,
+    "_source": {
+      "event_type": "dark_rendezvous",
+      "vessels": {
+        "vessel_0": {
+          "vessel_id": "B:150000320:1687551946:3554040:1010471",
+          "track_id": "B:150000320:1687551946:3554040:1010471",
+          "class": "vessel",
+          "name": "Unknown",
+          "mmsi": 150000320,
+          "country_filter": [
+            "N/A"
+          ],
+          "display_name": "150000320",
+          "attribution": {
+            "mmsi": "AIS"
+          }
+        }
+      },
+      "vessel_count": 1,
+      "event_id": "B:150000320:1687551946:3554040:1010471:1689565109:1689573928",
+      "event_details": {
+        "none_score": 0.061,
+        "osr_score": 0.567,
+        "fishing_score": 0.372,
+        "model_name": "three-class-model-validation-20220928_1753",
+        "dist2coast": 184,
+        "data_gen_mode": "streaming",
+        "_expires_at": "2023-07-17T08:35:28+00:00",
+        "transshipment": "med"
+      },
+      "start": {
+        "time": "2023-07-17T03:38:29+00:00",
+        "point": {
+          "lat": -1.95952,
+          "lon": -173.89952166666666
+        }
+      },
+      "end": {
+        "time": "2023-07-17T06:05:28+00:00",
+        "point": {
+          "lat": -1.9429566666666667,
+          "lon": -173.88298833333334
+        }
+      },
+      "created": "2023-07-17T08:30:25.449673+00:00",
+      "updated": "2023-07-17T08:30:25.449754+00:00"
+    },
+    "sort": [
+      "2023-07-17T03:38:29.000Z"
+    ]
+  },
+  {
+    "_index": "event-history",
+    "_id": "B:45815513:1688825545:59220:869944:1690752317:1690760949",
+    "_score": null,
+    "_source": {
+      "event_type": "dark_rendezvous",
+      "vessels": {
+        "vessel_0": {
+          "vessel_id": "B:45815513:1688825545:59220:869944",
+          "track_id": "B:45815513:1688825545:59220:869944",
+          "class": "vessel",
+          "name": "Unknown",
+          "mmsi": 45815513,
+          "country_filter": [
+            "N/A"
+          ],
+          "display_name": "45815513",
+          "attribution": {
+            "mmsi": "AIS"
+          }
+        }
+      },
+      "vessel_count": 1,
+      "event_id": "B:45815513:1688825545:59220:869944:1690752317:1690760949",
+      "event_details": {
+        "none_score": 0.001,
+        "osr_score": 0.905,
+        "fishing_score": 0.094,
+        "model_name": "three-class-model-validation-20220928_1753",
+        "dist2coast": 168,
+        "data_gen_mode": "streaming",
+        "_expires_at": "2023-07-31T02:19:09+00:00",
+        "transshipment": "med"
+      },
+      "start": {
+        "time": "2023-07-30T21:25:17+00:00",
+        "point": {
+          "lat": -5.783503333333333,
+          "lon": -170.455435
+        }
+      },
+      "end": {
+        "time": "2023-07-30T23:49:09+00:00",
+        "point": {
+          "lat": -5.784708333333334,
+          "lon": -170.46339666666665
+        }
+      },
+      "created": "2023-07-31T02:00:33.638848+00:00",
+      "updated": "2023-07-31T02:00:33.638896+00:00"
+    },
+    "sort": [
+      "2023-07-30T21:25:17.000Z"
+    ]
+  }
+]
+
+Q: Which vessels appear in these events?
+A: get_all_values(json_data, key="vessel_id")
+
+Q: How many events in this json?
+A: length(json_data)
+
+Q: How many dark rendezvous events in this json?
+A: length([x for x in json_data if x["_source"]["event_type"] == "dark_rendezvous"])

@@ -1,6 +1,7 @@
 import json
 import logging
 import os
+from json import JSONDecodeError
 
 import requests
 
@@ -18,6 +19,7 @@ class SkylightAPIModel(BaseModel):
         super().__init__(**kwargs)
         self.host = host
         self.token = os.environ['SKYLIGHT_TOKEN']
+        self.ignore_keys = ["_index", "_id", "_score", "fishing_score"]
 
     def generate_output(self, state: SearchState) -> GenerationOutputs:
         current_node = state.get_open_node()
@@ -27,5 +29,17 @@ class SkylightAPIModel(BaseModel):
                          headers={"Authorization": "Bearer {}".format(self.token)})
         logger.debug("Requesting: {}".format(r.url))
         logger.debug("Output: {}".format(r.text))
-        output_json = json.loads(r.text)["hits"]["hits"]
+        try:
+            output_json = json.loads(r.txt)
+        except JSONDecodeError:
+            logger.error("Could not parse the response: {}".format(r.txt))
+            return GenerationOutputs(outputs=[])
+
+        output_json = self.clean_json(output_json)
         return GenerationOutputs(outputs=[json.dumps(output_json)])
+
+    def clean_json(self, output_json):
+        # Remove unnecessary fields to save token budget
+        while "hits" in output_json:
+            output_json = output_json["hits"]
+        return output_json

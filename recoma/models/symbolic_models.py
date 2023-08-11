@@ -3,6 +3,7 @@ import re
 
 from recoma.models.base_models import BaseModel
 from recoma.models.generator import GenerationOutputs
+from recoma.search.state import SearchState
 
 logger = logging.getLogger(__name__)
 
@@ -207,3 +208,16 @@ class ReactController(BaseModel):
             else:
                 raise ValueError("Unknown last_step: " + last_step)
             return [new_state]
+
+
+@BaseModel.register("program_exec")
+class ProgramExecuter(BaseModel):
+
+    def generate_output(self, state: SearchState) -> GenerationOutputs:
+        curr_node = state.get_open_node()
+        input_prog = curr_node.input_str
+        output = self.eval_program(input_prog)
+        return GenerationOutputs(outputs=[output])
+
+    def eval_program(self, input_prog):
+        return eval(input_prog)
