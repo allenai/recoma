@@ -40,12 +40,12 @@ class SearchNode(Node):
         self._tag = tag
 
     def shrink_for_output(self, input_str):
-        return input_str if len(input_str) < 100 else (input_str[:30] + "..." + input_str[-10:])
+        return input_str if len(input_str) < 150 else (input_str[:30] + "..." + input_str[-10:])
 
     @property
     def tag(self):
         if self._tag:
-            return self._tag
+            return self.shrink_for_output(self._tag)
         label = ""
         if self.is_open():
             label += "*"
@@ -75,7 +75,8 @@ class SearchNode(Node):
             for input_str, output_strs in self.data["prompts"]:
                 details += "<b>Input:</b>\n<br>\n" + input_str.replace("\n", "<br>") + "\n<br>\n"
                 for output_str in output_strs:
-                    details += "&nbsp;<b>Output:</b>\n<br>\n" + output_str.replace("\n", "<br>") + "\n<br>\n"
+                    details += "&nbsp;<b>Output:</b>\n<br>\n" + output_str.replace("\n",
+                                                                                   "<br>") + "\n<br>\n"
                 details += "\n<hr>\n"
         if details == "":
             return summary
@@ -160,9 +161,8 @@ class SearchState(Tree):
                           margin-left: 2em;
                          }
                         </style>
-                        <html>
             """
-            footer = "</html>"
+            footer = ""
         children_repr = ""
         for child in self.get_children(parent):
             children_repr += self.to_html_tree(child) + "\n"

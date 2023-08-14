@@ -1,10 +1,11 @@
 import json
 
-import logger
+import logging
 
 from recoma.models.base_models import BaseModel
 from recoma.models.symbolic_models import ProgramExecuter
 
+logger = logging.getLogger(__name__)
 
 def get_values(json_data, key):
     values = []
