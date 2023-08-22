@@ -68,9 +68,4 @@ Q3: [textqa] Who caught the 33-yard touchdown?
 #3: Greg Olsen
 Q4: [EOQ]
 
-QC: {{ input_str }}
-{% for subqa in subqas -%}
-{{ subqa.subqf }}: {{ subqa.subq }}
-{{ subqa.subaf }}: {{ subqa.suba }}
-{%- endfor %}
-{{ subqf_final }}:
+{{ input_str }}

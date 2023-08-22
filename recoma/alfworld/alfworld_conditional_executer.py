@@ -3,7 +3,7 @@ import logging
 
 from recoma.alfworld.alf_utils import set_observation, get_task_success_from_state, extract_task
 from recoma.models.api_models import ClientAPIModel
-from recoma.models.base_models import BaseModel
+from recoma.models.base_model import BaseModel
 
 logger = logging.getLogger(__name__)
 

@@ -1,7 +1,7 @@
 import logging
 from typing import Dict
 
-from recoma.models.base_models import BaseModel
+from recoma.models.base_model import BaseModel
 from recoma.search.state import SearchState
 
 logger = logging.getLogger(__name__)

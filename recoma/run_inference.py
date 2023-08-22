@@ -9,7 +9,7 @@ import gradio as gr
 from recoma.search.controller import Controller
 
 from recoma.datasets.reader import Example, DatasetReader
-from recoma.models.base_models import BaseModel
+from recoma.models.base_model import BaseModel
 from recoma.search.search import SearchAlgo
 from recoma.utils.env_utils import get_environment_variables
 

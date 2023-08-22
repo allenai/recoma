@@ -2,7 +2,7 @@ import logging
 
 import requests
 
-from recoma.models.base_models import BaseModel
+from recoma.models.base_model import BaseModel
 
 logger = logging.getLogger(__name__)
 

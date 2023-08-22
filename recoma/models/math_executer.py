@@ -4,7 +4,7 @@ import json
 
 from sympy import solve
 
-from recoma.models.base_models import BaseModel
+from recoma.models.base_model import BaseModel
 from recoma.models.generator import GenerationOutputs
 from recoma.search.state import SearchState
 

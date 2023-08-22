@@ -2,12 +2,13 @@ import logging
 from typing import Any
 
 from jinja2 import Template
+from recoma.models.base_model import BaseModel
 
-from recoma.models.base_models import BaseModel
 from recoma.models.generator import LMGenerator, GenerationOutputs
 from recoma.search.state import SearchState
 
 logger = logging.getLogger(__name__)
+
 
 # No need to register this class as it should only be used as a superclass for other models
 class PromptedModel(BaseModel):
@@ -63,5 +64,3 @@ class PromptedLMModel(PromptedModel):
         logger.debug("Output: " + output.outputs[0])
         open_node.add_input_output_prompt(lm_input, output)
         return output
-
-

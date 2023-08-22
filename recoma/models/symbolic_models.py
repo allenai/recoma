@@ -1,7 +1,7 @@
 import logging
 import re
 
-from recoma.models.base_models import BaseModel
+from recoma.models.base_model import BaseModel
 from recoma.models.generator import GenerationOutputs
 
 logger = logging.getLogger(__name__)

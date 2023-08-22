@@ -1,12 +1,16 @@
 local generator_params = import "../common/default_gpt_davinci002.libsonnet";
 {
     "models": {
+        "decomp_control": {
+            "type": "decomp_control",
+            "use_number_format": true,
+            "decomp_model": "decomp",
+            "qa_model": "router",
+        },
         "decomp": {
-            "type": "decomp_lm",
+            "type": "prompted_lm",
             "prompt_file": "configs/prompts/drop/decomp.txt",
             "generator_params": generator_params,
-            "use_number_format": true,
-            "next_model": "router"
         },
         "textqa": {
             "type": "prompted_lm",
@@ -24,7 +28,10 @@ local generator_params = import "../common/default_gpt_davinci002.libsonnet";
     },
     "search": {
         "type": "best_first",
-        "start_model": "decomp"
+        "start_model": "decomp_control",
+        "answerer": {
+            "type": "root"
+        }
     },
     "reader": {
       "type": "drop",

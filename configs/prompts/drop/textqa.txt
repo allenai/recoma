@@ -28,9 +28,8 @@ After a short week, the Lions hosted their division rivals the Chicago Bears for
 Q: Which touchdown passes were scored?
 A: ["10 yards", "6 yards", "25-yard TD pass", "6-yard TD"]
 
-{% for para in paras %}
+{% for para in paras -%}
 {{ para }}
-
 {% endfor %}
 Q: {{ input_str }}
 A:

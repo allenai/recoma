@@ -1,4 +1,4 @@
-from recoma.models.base_models import BaseModel
+from recoma.models.base_model import BaseModel
 from recoma.models.symbolic_models import logger
 
 

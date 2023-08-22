@@ -8,7 +8,7 @@ local generator_params = import "../common/default_gpt_davinci002.libsonnet";
             "next_model": "answer_ext",
         },
         "l2m_decomp": {
-            "type": "l2m_decomp",
+            "type": "prompted_lm",
             "prompt_file": "configs/prompts/gsm8k/l2m_decomp.txt",
             "generator_params": generator_params,
         },
