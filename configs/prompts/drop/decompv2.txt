@@ -1,0 +1,71 @@
+QC: How many percent were not from 45 to 64?
+Q1: [textqa] How many in percent were 45 to 64?
+#1: 28%
+Q2: [basic_math] What is the difference between 100 and 28%?
+#2: 72
+Q3: [EOQ]
+
+QC: How many years were between the Iroquois attacking the Neutral Nation, and having completely driven the trade from tradiitonal territory?
+Q1: [textqa] When did the Iroquois attack the Neutral Nation?
+#1: 1650
+Q2: [textqa] When did the Iroquois completely drove the tribe from traditional territory?
+#2: 1651
+Q3: [basic_math] What is the difference in years between 1651 and 1650?
+#3: 1
+Q4: [EOQ]
+
+QC: How many points did Iowa State lose to Michigan State by?
+Q1: [textqa] How many points did Iowa State score in the game against Michigan State?
+#1: 64
+Q2: [textqa] How many points did Michigan State score in the game against Iowa State?
+#2: 75
+Q3: [basic_math] What is the difference between 75 and 64?
+#3: 9
+Q4: [EOQ]
+
+QC: Who threw more touchdown passes, Donovan McNabb or Eli Manning?
+Q1: [textqa] Which touchdown passes did Donovan McNabb throw?
+#1: ["17-yard", "54-yard", "23-yard"]
+Q2: [textqa] Which touchdown passes did Eli Manning throw?
+#2: "18-yard"
+Q3: [basic_math] If Donovan McNabb threw 3 touchdowns and Eli Manning threw 1 touchdown, who threw more touchdown passes?
+#3: Donovan McNabb
+Q4: [EOQ]
+
+QC: Which was larger, the average household size or the average family size?
+Q1: [textqa] What is the average household size?
+#1: 2.23
+Q2: [textqa] What is the average family size?
+#2: 2.98
+Q3: [basic_math] If the average household size is 2.23 and average family size is 2.98, which is larger?
+#3: average family size
+Q4: [EOQ]
+
+QC: How many North Koreans were killed and captured in total?
+Q1: [textqa] How many North Koreans were killed?
+#1: 110
+Q2: [textqa] How many North Koreans were captured?
+#2: 7
+Q3: [basic_math] What is the total of 110 and 7?
+#3: 117
+Q4: [EOQ]
+
+QC: How many yards fewer was Prater's last field goal compared to his first?
+Q1: [textqa] How long was Prater's last field goal?
+#1: 40-yard
+Q2: [textqa] How long was Prater's first field goal?
+#2: 46-yard
+Q3: [textqa] What is the difference between 46-yard and 40-yard?
+#3: 6
+Q4: [EOQ]
+
+QC: Who caught the longest touchdown reception of the game?
+Q1: [textqa] Which touchdowns were scored?
+#1: ["11-yards", "33-yard", "6-yard", "17-yard", "15-yard", "3-yard", "20-yard", "4-yard"]
+Q2: [basic_math] Which is the largest item in #1?
+#2: "33-yard"
+Q3: [textqa] Who caught the 33-yard touchdown?
+#3: Greg Olsen
+Q4: [EOQ]
+
+{{ input_str }}

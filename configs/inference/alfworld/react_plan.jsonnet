@@ -19,8 +19,8 @@ local generator_params = import "../common/default_gpt_davinci003.libsonnet";
              }
         },
         "plan": {
-            "type": "alf_planner",
-            "prompt_file": "configs/prompts/alfworld/planner.txt",
+            "type": "alf_plannerv2",
+            "prompt_file": "configs/prompts/alfworld/plannerv2.txt",
             "next_model": "exec_ifnot_plan",
             "generator_params": generator_params + {"stop": ["\n\n"], "max_tokens": 300},
         },
@@ -33,7 +33,7 @@ local generator_params = import "../common/default_gpt_davinci003.libsonnet";
         },
         "react": {
             "type": "prompted_lm",
-            "prompt_file": "configs/prompts/alfworld/atomic_executer.txt",
+            "prompt_file": "configs/prompts/alfworld/executerv2.txt",
             "generator_params": generator_params,
         },
         "alfworld": {
@@ -46,7 +46,7 @@ local generator_params = import "../common/default_gpt_davinci003.libsonnet";
     "search": {
         "type": "best_first",
         "max_search_iters": 200,
-        "max_search_depth": 6,
+        "max_search_depth": 12,
         "start_model": "init",
         "answerer": {
             "type": "alf_reward"

@@ -5,3 +5,4 @@ openai
 diskcache
 tenacity
 logger
+gradio

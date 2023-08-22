@@ -5,8 +5,9 @@ from dataclasses import dataclass
 from pathlib import Path
 
 import _jsonnet
+import gradio as gr
+from recoma.search.controller import Controller
 
-from recoma.control.controller import Controller
 from recoma.datasets.reader import Example, DatasetReader
 from recoma.models.base_models import BaseModel
 from recoma.search.search import SearchAlgo
@@ -32,6 +33,8 @@ def parse_arguments():
                             help="Debug output")
     arg_parser.add_argument('--demo', action='store_true', default=False,
                             help="Demo mode")
+    arg_parser.add_argument('--gradio_demo', action='store_true', default=False,
+                            help="Gradio Demo mode")
     arg_parser.add_argument('--dump_prompts', action='store_true', default=False,
                             help="Dump input prompts -> output in output directory.")
     arg_parser.add_argument('--threads', default=1, type=int,
@@ -138,6 +141,50 @@ def inference_mode(args, configurable_systems: ConfigurableSystems):
         json.dump(prediction_dump, output_fp)
 
 
+def gradio_demo_fn(args, configurable_systems: ConfigurableSystems,
+                   qid: str, question: str, context: str):
+    qid_example_map = {}
+    search_algo = configurable_systems.search
+    reader = configurable_systems.reader
+    Path(args.output_dir).mkdir(parents=True, exist_ok=True)
+    if args.input:
+        for eg in reader.read_examples(args.input):
+            qid_example_map[eg.qid] = eg
+
+    if qid in qid_example_map:
+        example = qid_example_map[qid]
+        print("Using example from input file: " + str(example))
+    else:
+        paras = [context] if context else []
+        example = Example(qid=qid, question=question, gold_answer=None, paras=paras)
+    predictions = search_algo.predict(example=example)
+    if args.dump_prompts and predictions.final_state:
+        print(predictions.final_state.all_input_output_prompts())
+    return json.dumps(predictions.prediction), \
+           (predictions.final_state.to_html_tree() if predictions.final_state else "")
+
+
+def build_gradio_interface():
+    gradio_fn = lambda qid, question, context: gradio_demo_fn(parsed_args, config_sys,
+                                                              qid, question, context)
+    # demo = gr.Interface(fn=gradio_fn,
+    #                     inputs=["text", "text", "text"], outputs=["json", "html"])
+    with gr.Blocks() as demo:
+        qid = gr.Textbox(max_lines=1, label="QID")
+        question = gr.Textbox(max_lines=1, label="Question")
+        context = gr.Textbox(line=5, max_lines=20, label="Context")
+        button = gr.Button("Solve")
+
+        answer_output = gr.JSON(label="Answer:")
+        with gr.Accordion("More details!", open=False):
+            html_output = gr.HTML(label="Inference Tree")
+
+        button.click(gradio_fn, inputs=[qid, question, context],
+                     outputs=[answer_output, html_output])
+
+    return demo
+
+
 if __name__ == "__main__":
 
     parsed_args = parse_arguments()
@@ -149,5 +196,9 @@ if __name__ == "__main__":
 
     if parsed_args.demo:
         demo_mode(args=parsed_args, configurable_systems=config_sys)
+    elif parsed_args.gradio_demo:
+        interface = build_gradio_interface()
+        # DON'T SET share=True
+        interface.launch(server_name="0.0.0.0")
     else:
         inference_mode(args=parsed_args, configurable_systems=config_sys)

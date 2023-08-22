@@ -64,7 +64,9 @@ class SearchNode(Node):
                 summary += "[" + self.target + "] "
             display_str = self.input_str_for_display or self.input_str
             if self.output:
-                summary += display_str + " => " + self.output
+                summary += display_str + " => " + \
+                           "<div style=\"margin-left: 3em;\">" + \
+                           self.output.replace("\n", "\n<br>") + "</div>"
             else:
                 summary += display_str + " => ... "
         details = ""
@@ -156,10 +158,9 @@ class SearchState(Tree):
                           details > *:not(summary){
                           margin-left: 2em;
                          }
-                        </style>
-                        <html>
+                        </style>  
             """
-            footer = "</html>"
+            footer = ""
         children_repr = ""
         for child in self.get_children(parent):
             children_repr += self.to_html_tree(child) + "\n"
@@ -195,7 +196,10 @@ class SearchState(Tree):
                       next_step_model: str,
                       current_step_node: SearchNode,
                       next_step_input_for_display: str = None,
-                      metadata: dict[str, Any] = {}):
+                      metadata: dict[str, Any] = None):
+        # The default fn argument will be shared across calls, so don't set default value to {}
+        if metadata is None:
+            metadata = {}
         new_node = SearchNode(input_str=next_step_input,
                               target_model=next_step_model,
                               input_str_for_display=next_step_input_for_display,

@@ -54,11 +54,11 @@ class AlfWorldConditionalExecuter(BaseModel):
             executor_node = children_nodes[0]
             if get_task_success_from_state(new_state, executor_node):
                 # success! no need to try except model
-                _ = input("Task succeeded!")
+                # _ = input("Task succeeded!")
                 current_node.close(executor_node.output)
                 return [new_state]
             else:
-                _ = input("Task failed!")
+                # _ = input("Task failed!")
                 # failure! need to try except model
                 # first load from checkpoint
                 save_id = current_node.data["save_id"]
@@ -71,7 +71,7 @@ class AlfWorldConditionalExecuter(BaseModel):
                 return [new_state]
         elif len(children_nodes) == 2:
             # except model attempted, check if it succeeded
-            planner_node = new_state.get_node(children_nodes[1])
+            planner_node = children_nodes[1]
             if get_task_success_from_state(new_state, planner_node):
                 current_node.close(planner_node.output)
                 return [new_state]

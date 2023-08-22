@@ -47,14 +47,3 @@ class BaseModel(RegistrableFromDict):
             new_states.append(new_state)
 
         return new_states
-
-
-# No need to register this class as it should only be used as a superclass for other models
-class PromptedModel(BaseModel):
-    def __init__(self, prompt_file: str, **kwargs):
-        super().__init__(**kwargs)
-        if prompt_file:
-            with open(prompt_file, "r") as input_fp:
-                self.prompt = "".join(input_fp.readlines())
-        else:
-            self.prompt = ""

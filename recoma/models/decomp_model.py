@@ -1,58 +1,55 @@
-import logging
 from typing import Any
 
-from jinja2 import Template
-
-from recoma.models.base_models import BaseModel, PromptedModel
-from recoma.models.generator import LMGenerator, GenerationOutputs
+from recoma.models import PromptedLMModel
+from recoma.models.base_models import BaseModel
+from recoma.models.generator import GenerationOutputs
 from recoma.search.state import SearchState, SearchNode
 
-logger = logging.getLogger(__name__)
 
+@BaseModel.register("decomp_control")
+class DecompController(BaseModel):
 
-@BaseModel.register("prompted_lm")
-class PromptedLMModel(PromptedModel):
-
-    def __init__(self, generator_params, **kwargs):
+    def __init__(self, decomp_model: str, qa_model: str,
+                 use_number_format=False, eoq_string="[EOQ]", **kwargs):
         super().__init__(**kwargs)
-        self.generator = LMGenerator.from_dict(generator_params)
+        self.use_number_format = use_number_format
+        self.eoq_string = eoq_string
+        self.decomp_model = decomp_model
+        self.qa_model = qa_model
 
-    def build_lm_input(self, prompt: str, input_str: str, state: SearchState) -> str:
-        """
-        Generate the language model input given the prompt, input string and search state.
-        :return: language model input string
-        """
-        template = Template(prompt)
-        template_params = self.populate_template_dictionary(input_str, state)
-        return template.render(template_params)
-
-    def populate_template_dictionary(self, input_str: str, state: SearchState) -> dict[str, Any]:
-        """
-        Generate a dictionary from var names to objects that will be used to populate the Jinja2
-        template prompt
-        :param input_str: input string to the model
-        :param state: current search state
-        :return: var to object mapping for prompt template
-        """
-        return {
-            "input_str": input_str,
-            "paras": state.example.paras,
-            "question": state.example.question
-        }
-
-    def generate_output(self, state) -> GenerationOutputs:
-        """
-        Generate the output string using this prompted LM by first building the LM input prompt and
-        calling the generator to produce the output
-        :return: generator outputs
-        """
-        open_node = state.get_open_node()
-        lm_input = self.build_lm_input(self.prompt, open_node.input_str, state)
-        output = self.generator.generate(lm_input)
-        logger.debug("Input: ..." + lm_input[-200:])
-        logger.debug("Output: " + output.outputs[0])
-        open_node.add_input_output_prompt(lm_input, output)
-        return output
+    def __call__(self, state: SearchState):
+        new_state = state.clone(deep=True)
+        current_node = new_state.get_open_node()
+        children = new_state.get_children(current_node)
+        if len(children) % 2 == 0:
+            # decompose
+            input_str = current_node.input_str + "\n"
+            for child_idx in range(int(len(children) / 2)):
+                answer_node = children[child_idx * 2 + 1]
+                subqf = "Q{}".format(child_idx + 1) if self.use_number_format else "QS"
+                subaf = "#{}".format(child_idx + 1) if self.use_number_format else "A"
+                input_str += subqf + ": " + answer_node.input_str + "\n"
+                input_str += subaf + ": " + answer_node.output + "\n"
+            input_str += "Q{}: ".format(int(len(children) / 2) + 1) if self.use_number_format \
+                else "QS: "
+            new_state.add_next_step(next_step_input=input_str,
+                                    next_step_model=self.decomp_model,
+                                    current_step_node=current_node)
+        else:
+            # qa
+            last_question = children[-1].output
+            if last_question == self.eoq_string:
+                answer = children[-2].output
+                current_node.close(output=answer)
+                if self.next_model:
+                    new_state.add_next_step(next_step_input=answer,
+                                            next_step_model=self.next_model,
+                                            current_step_node=current_node)
+            else:
+                new_state.add_next_step(next_step_input=last_question,
+                                        next_step_model=self.qa_model,
+                                        current_step_node=current_node)
+        return [new_state]
 
 
 @BaseModel.register("decomp_lm")
