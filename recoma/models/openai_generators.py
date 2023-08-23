@@ -63,7 +63,7 @@ class GPT3CompletionGenerator(LMGenerator):
         self.engine = engine
         self.use_cache = use_cache
 
-    @retry(wait=wait_random_exponential(min=1, max=60), stop=stop_after_attempt(10),
+    @retry(wait=wait_random_exponential(min=1, max=20), stop=stop_after_attempt(20),
            before_sleep=before_sleep_log(logger, logging.DEBUG))
     def completion_with_backoff(self, function, **kwargs) -> dict[Any, Any]:
         return function(**kwargs)

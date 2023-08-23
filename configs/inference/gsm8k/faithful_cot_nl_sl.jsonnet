@@ -16,7 +16,6 @@ local generator_params = import "../common/default_gpt_gpt3.5.libsonnet";
         "start_model": "program_cot"
     },
     "reader": {
-      "type": "drop",
-      "add_paras": false
+      "type": "gsm8k"
     }
 }

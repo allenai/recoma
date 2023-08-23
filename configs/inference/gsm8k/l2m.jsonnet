@@ -1,4 +1,4 @@
-local generator_params = import "../common/default_gpt_davinci002.libsonnet";
+local generator_params = import "../common/default_gpt_davinci003.libsonnet";
 {
     "models": {
         "l2m_control": {
@@ -10,12 +10,12 @@ local generator_params = import "../common/default_gpt_davinci002.libsonnet";
         "l2m_decomp": {
             "type": "prompted_lm",
             "prompt_file": "configs/prompts/gsm8k/l2m_decomp.txt",
-            "generator_params": generator_params,
+            "generator_params": generator_params + { "max_tokens": 200 },
         },
         "l2m_qa": {
             "type": "prompted_lm",
             "prompt_file": "configs/prompts/gsm8k/l2m_qa.txt",
-            "generator_params": generator_params
+            "generator_params": generator_params + { "max_tokens": 300 }
         },
         "answer_ext": {
             "type": "regex_ext",
@@ -27,7 +27,6 @@ local generator_params = import "../common/default_gpt_davinci002.libsonnet";
         "start_model": "l2m_control"
     },
     "reader": {
-      "type": "drop",
-      "add_paras": false
+      "type": "gsm8k"
     }
 }

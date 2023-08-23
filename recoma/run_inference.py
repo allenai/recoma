@@ -3,14 +3,15 @@ import json
 import logging
 from dataclasses import dataclass
 from pathlib import Path
+from typing import List
 
 import _jsonnet
 import gradio as gr
-from recoma.search.controller import Controller
 
 from recoma.datasets.reader import Example, DatasetReader
 from recoma.models.base_model import BaseModel
-from recoma.search.search import SearchAlgo
+from recoma.search.controller import Controller
+from recoma.search.search import SearchAlgo, ExamplePrediction
 from recoma.utils.env_utils import get_environment_variables
 
 logger = logging.getLogger(__name__)
@@ -112,13 +113,17 @@ def inference_mode(args, configurable_systems: ConfigurableSystems):
         mp.set_start_method("spawn")
         with mp.Pool(args.threads) as p:
             example_predictions = p.map(search_algo.predict,
-                                        reader.read_examples(args.input))
+                                        reader.get_examples(args.input))
     else:
-        for example in reader.read_examples(args.input):
+        for example in reader.get_examples(args.input):
             example_predictions.append(search_algo.predict(example))
+    dump_predictions(args, example_predictions)
+
+def dump_predictions(args, example_predictions: List[ExamplePrediction]):
     Path(args.output_dir + "/tree_dump").mkdir(parents=True, exist_ok=True)
     if args.dump_prompts:
         Path(args.output_dir + "/prompts_dump").mkdir(parents=True, exist_ok=True)
+    # Dump trees and I/O Prompts
     for ex in example_predictions:
         with open(args.output_dir + "/tree_dump/" + ex.example.qid + ".json", "w") as output_fp:
             if ex.final_state:
@@ -128,8 +133,11 @@ def inference_mode(args, configurable_systems: ConfigurableSystems):
                       "w") as output_fp:
                 if ex.final_state:
                     output_fp.write(ex.final_state.all_input_output_prompts())
-    with open(args.output_dir + "/predictions.json", "w") as output_fp:
+    # Dump Predictions
+    with open(args.output_dir + "/predictions.json", "w") as output_fp, \
+            open(args.output_dir + "/all_data.jsonl", "w") as all_data_fp:
         prediction_dump = {}
+        total_score = 0
         for x in example_predictions:
             try:
                 pred_json = json.loads(x.prediction)
@@ -137,7 +145,15 @@ def inference_mode(args, configurable_systems: ConfigurableSystems):
                     pred_json = x.prediction
             except Exception:
                 pred_json = x.prediction
+            all_data_dict = x.example.__dict__
+            all_data_dict["predicted"] = pred_json
+            score = 1 if (x.prediction == x.example.gold_answer) else 0
+            all_data_dict["correct"] = str(score)
+            total_score += score
+            all_data_fp.write(json.dumps(all_data_dict) + "\n")
             prediction_dump[x.example.qid] = pred_json
+        print("EM Score: {} ({}/{})".format(100 * total_score / len(example_predictions),
+                                            total_score, len(example_predictions)))
         json.dump(prediction_dump, output_fp)
 
 

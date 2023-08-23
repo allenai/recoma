@@ -33,8 +33,7 @@ local generator_params = import "../common/default_gpt_davinci002.libsonnet";
         }
     },
     "reader": {
-      "type": "drop",
-      "add_paras": true
+      "type": "alf"
     }
 }
 
