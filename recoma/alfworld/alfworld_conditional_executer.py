@@ -2,8 +2,8 @@ import json
 import logging
 
 from recoma.alfworld.alf_utils import set_observation, get_task_success_from_state, extract_task
-from recoma.models.api_models import ClientAPIModel
-from recoma.models.base_model import BaseModel
+from recoma.models.core.api_models import ClientAPIModel
+from recoma.models.core.base_model import BaseModel
 
 logger = logging.getLogger(__name__)
 
@@ -54,11 +54,9 @@ class AlfWorldConditionalExecuter(BaseModel):
             executor_node = children_nodes[0]
             if get_task_success_from_state(new_state, executor_node):
                 # success! no need to try except model
-                # _ = input("Task succeeded!")
                 current_node.close(executor_node.output)
                 return [new_state]
             else:
-                # _ = input("Task failed!")
                 # failure! need to try except model
                 # first load from checkpoint
                 save_id = current_node.data["save_id"]

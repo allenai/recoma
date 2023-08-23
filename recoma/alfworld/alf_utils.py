@@ -27,17 +27,6 @@ def get_task_success_from_state(state: SearchState, node: SearchNode):
             return get_task_success_from_state(state, children[-1])
     return False
 
-# def get_task_success_from_state(state: SearchState, node: SearchNode):
-#     print(node.data)
-#     task_success_node = get_task_success(node.data)
-#     print(task_success_node)
-#     if task_success_node is None:
-#         child_ids = state.get_children_ids(node.identifier)
-#         if child_ids:
-#             return get_task_success_from_state(state, state.get_node(child_ids[-1]))
-#
-#     return task_success_node
-
 
 def get_observation_from_state(state: SearchState, node: SearchNode):
     obs_node = get_observation(node.data)

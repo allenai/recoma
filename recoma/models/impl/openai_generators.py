@@ -12,7 +12,7 @@ from tenacity import (
     before_sleep_log
 )  # for exponential backoff
 
-from recoma.models.generator import LMGenerator, GenerationOutputs
+from recoma.models.core.generator import LMGenerator, GenerationOutputs
 
 logger = logging.getLogger(__name__)
 

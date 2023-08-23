@@ -2,9 +2,9 @@ import logging
 from typing import Any
 
 from jinja2 import Template
-from recoma.models.base_model import BaseModel
+from recoma.models.core.base_model import BaseModel
+from recoma.models.core.generator import LMGenerator, GenerationOutputs
 
-from recoma.models.generator import LMGenerator, GenerationOutputs
 from recoma.search.state import SearchState
 
 logger = logging.getLogger(__name__)

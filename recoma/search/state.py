@@ -3,7 +3,7 @@ from typing import Optional, Any
 from treelib import Tree, Node
 
 from recoma.datasets.reader import Example
-from recoma.models.generator import GenerationOutputs
+from recoma.models.core.generator import GenerationOutputs
 
 
 class SearchNode(Node):

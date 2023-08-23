@@ -1,6 +1,6 @@
 from typing import Optional, List
 
-from recoma.models.generator import GenerationOutputs
+from recoma.models.core.generator import GenerationOutputs
 from recoma.search.state import SearchState
 from recoma.utils.class_utils import RegistrableFromDict
 
