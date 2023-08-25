@@ -21,11 +21,14 @@ class DecompController(BaseModel):
             # decompose
             input_str = current_node.input_str + "\n"
             for child_idx in range(int(len(children) / 2)):
-                answer_node = children[child_idx * 2 + 1]
+                decomp_node = children[child_idx * 2]
+                qa_node = children[child_idx * 2 + 1]
                 subqf = "Q{}".format(child_idx + 1) if self.use_number_format else "QS"
                 subaf = "#{}".format(child_idx + 1) if self.use_number_format else "A"
-                input_str += subqf + ": " + answer_node.input_str + "\n"
-                input_str += subaf + ": " + answer_node.output + "\n"
+                # question
+                input_str += subqf + ": " + decomp_node.output + "\n"
+                # answer
+                input_str += subaf + ": " + qa_node.output + "\n"
             input_str += "Q{}: ".format(int(len(children) / 2) + 1) if self.use_number_format \
                 else "QS: "
             new_state.add_next_step(next_step_input=input_str,
@@ -42,7 +45,24 @@ class DecompController(BaseModel):
                                             next_step_model=self.next_model,
                                             current_step_node=current_node)
             else:
-                new_state.add_next_step(next_step_input=last_question,
+                # QA starts from the 2nd node and alternated between decomp and QA
+                var_assignments = self.build_var_assignments(children[1::2])
+                new_question = self.update_question_with_vars(last_question, var_assignments)
+                new_state.add_next_step(next_step_input=new_question,
                                         next_step_model=self.qa_model,
                                         current_step_node=current_node)
         return [new_state]
+
+    @staticmethod
+    def build_var_assignments(qa_children):
+        var_assignments = {}
+        for idx, child in enumerate(qa_children):
+            suba = child.output
+            var_assignments["#" + str(idx + 1)] = suba
+        return var_assignments
+
+    @staticmethod
+    def update_question_with_vars(input_str: str, var_assignments: dict[str, str]):
+        for var_id, var_val in var_assignments.items():
+            input_str = input_str.replace(var_id, var_val)
+        return input_str

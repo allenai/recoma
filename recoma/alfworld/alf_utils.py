@@ -1,3 +1,5 @@
+from treelib import Tree
+
 from recoma.search.state import SearchState, SearchNode
 
 

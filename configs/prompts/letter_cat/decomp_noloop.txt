@@ -1,0 +1,40 @@
+QC: Take the last letters of the words in "Augusta Ada King" and concatenate them using a space.
+QS: [split] What are the words in "Augusta Ada King"?
+A: ["Augusta", "Ada", "King"]
+QS: [str_position] What is the last letter in "Augusta"?
+A: "a"
+QS: [str_position] What is the last letter in "Ada"?
+A: "a"
+QS: [str_position] What is the last letter in "King"?
+A: "g"
+QS: [merge] Concatenate ["a", "a", "g"] using a space.
+A: "a a g"
+QS: [EOQ]
+
+QC: Take the letters at position 1 of the words in "Alan Mathison Turing" and concatenate them using a space.
+QS: [split] What are the words in "Alan Mathison Turing"?
+A: ["Alan", "Mathison", "Turing"]
+QS: [str_position] What is the letter at position 1 in "Alan"?
+A: "A"
+QS: [str_position] What is the letter at position 1 in "Mathison"?
+A: "M"
+QS: [str_position] What is the letter at position 1 in "Turing"?
+A: "T"
+QS: [merge] Concatenate ["A", "M", "T"] using a space.
+A: "A M T"
+QS: [EOQ]
+
+QC: Take the letters at position 4 of the words in "Herbert Alexander Simon" and concatenate them using a space.
+QS: [split] What are the words in "Herbert Alexander Simon"?
+A: ["Herbert", "Alexander", "Simon"]
+QS: [str_position] What is the letter at position 4 in "Herbert"?
+A: "b"
+QS: [str_position] What is the letter at position 4 in "Alexander"?
+A: "x"
+QS: [str_position] What is the letter at position 4 in "Simon"?
+A: "o"
+QS: [merge] Concatenate ["b", "x", "o"] using a space.
+A: "b x o"
+QS: [EOQ]
+
+{{ input_str }}
