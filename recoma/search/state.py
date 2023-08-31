@@ -31,8 +31,6 @@ class SearchNode(Node):
         return self.target
 
     def close(self, output):
-        # print("CLOSING!!" + str(self.tag) + "\n" + str(output))
-        # input("Wait")
         self._is_open = False
         self.output = output
 
@@ -48,9 +46,12 @@ class SearchNode(Node):
             label += "*"
         display_str = self.input_str_for_display or self.input_str
         if self.output:
-            label += "[" + self.target + "] " + self.output
+            if self.input_str_for_display:
+                label += "<" + self.target + "> " + self.input_str_for_display + " => " + self.output
+            else:
+                label += "<" + self.target + "> " + self.output
         else:
-            label += "[" + self.target + "] " + display_str + " => ... "
+            label += "<" + self.target + "> " + display_str + " => ... "
         return label
 
     def to_html_node(self):
@@ -59,25 +60,25 @@ class SearchNode(Node):
             summary = self._tag
         else:
             if self.is_open():
-                summary += "<u>[" + self.target + "]</u> "
+                summary += "<u>&lt;" + self.target + "&gt;</u> "
             else:
-                summary += "[" + self.target + "] "
-            display_str = self.input_str_for_display or self.input_str
+                summary += "<b>&lt;" + self.target + "&gt;</b> "
+            if self.input_str_for_display:
+                summary += self.input_str_for_display + " => "
             if self.output:
-                summary += display_str + " => " + \
-                           "<div style=\"margin-left: 3em;\">" + \
-                           self.output.replace("\n", "\n<br>") + "</div>"
+                summary += self.output.replace("\n", "\n<br>")
             else:
-                summary += display_str + " => ... "
+                summary += " ... "
         details = ""
         if "prompts" in self.data:
             for input_str, output_strs in self.data["prompts"]:
                 details += "<b>Input:</b>\n<br>\n" + input_str.replace("\n", "<br>") + "\n<br>\n"
                 for output_str in output_strs:
-                    details += "&nbsp;<b>Output:</b>\n<br>\n" + output_str.replace("\n", "<br>") + "\n<br>\n"
+                    details += "&nbsp;<b>Output:</b>\n<br>\n" + output_str.replace("\n",
+                                                                                   "<br>") + "\n<br>\n"
                 details += "\n<hr>\n"
         if details == "":
-            return summary
+            return summary + "<br/>"
         else:
             return """{}
                       <details style="margin-left: 5em;font-size: 75%;">
@@ -89,9 +90,6 @@ class SearchNode(Node):
     def add_input_output_prompt(self, input_str: str, output: GenerationOutputs):
         if "prompts" not in self.data:
             self.data["prompts"] = []
-        # else:
-        #     print("Current metadata: " + str(self.metadata["prompts"][0][1]))
-        # print("Adding " + str([x for x in output.outputs]))
         self.data["prompts"].append((
             input_str,
             [x for x in output.outputs]
@@ -165,12 +163,15 @@ class SearchState(Tree):
         for child in self.get_children(parent):
             children_repr += self.to_html_tree(child) + "\n"
 
-        tree_repr = """<details>
-                      <summary>{}</summary>
-                      {}
-                   </details>
-               """.format(parent.to_html_node(),
-                          children_repr)
+        if children_repr:
+            tree_repr = """<details>
+                          <summary>{}</summary>
+                          {}
+                       </details>
+                   """.format(parent.to_html_node(),
+                              children_repr)
+        else:
+            tree_repr = "&#x2022;{}".format(parent.to_html_node())
         return header + tree_repr + footer
 
     def all_input_output_prompts(self) -> str:
@@ -214,7 +215,7 @@ class SearchState(Tree):
         while len(node_stack):
             popped_id = node_stack.pop()
             children_ids = self.get_children_ids(popped_id)
-            # print(children_ids)
+
             if children_ids:
                 assert popped_id not in popped_nids, self.nodes[popped_id].tag
                 node_stack.append(popped_id)
@@ -222,7 +223,7 @@ class SearchState(Tree):
                     assert child not in popped_nids, self.nodes[child].tag
                 node_stack.extend(reversed(children_ids))
             else:
-                # print("Popped! " + popped_id)
+
                 yield popped_id
                 popped_nids.add(popped_id)
                 if len(node_stack) == 0:

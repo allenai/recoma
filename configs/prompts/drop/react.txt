@@ -5,7 +5,7 @@ Observation: 28%
 Thought: To find out the percentage that is not from 45 to 64, we need to subtract 28% from 100.
 Action: [basic_math] What is the difference between 100 and 28%?
 Observation: 72
-Thought: [EOQ]
+Thought: Finish[72]
 
 Q: How many years were between the Iroquois attacking the Neutral Nation, and having completely driven the trade from tradiitonal territory?
 Thought: First we need to find when the Iroquois attacked the Neutral Nation.
@@ -17,7 +17,7 @@ Observation: 1651
 Thought: The difference between 1651 and 1650 would give the answer to the question.
 Action: [basic_math] What is the difference in years between 1651 and 1650?
 Observation: 1
-Thought: [EOQ]
+Thought: Finish[1]
 
 Q: How many points did Iowa State lose to Michigan State by?
 Thought: We need to first find the score of Iowa State in the game.
@@ -29,7 +29,7 @@ Observation: 75
 Thought: The difference in score between 75 and 64 should give us the points by which Iowa State lost to Michigan State.
 Action: [basic_math] What is the difference between 75 and 64?
 Observation: 9
-Thought: [EOQ]
+Thought: Finish[9]
 
 Q: Who threw more touchdown passes, Donovan McNabb or Eli Manning?
 Thought: We first need to find the touchdown passes scored by Donovan McNabb.
@@ -41,7 +41,7 @@ Observation: "18-yard"
 Thought: We need to compare the number of touchdown passes thrown by Donovan McNabb (3) to that of Eli Manning (1) to find who scored the most touchdown passes.
 Action: [basic_math] If Donovan McNabb threw 3 touchdowns and Eli Manning threw 1 touchdown, who threw more touchdown passes?
 Observation: Donovan McNabb
-Thought: [EOQ]
+Thought: Finish[Donovan McNabb]
 
 Q: Which was larger, the average household size or the average family size?
 Thought: We first need to find the average household size.
@@ -53,9 +53,9 @@ Observation: 2.98
 Thought: We need to compare this average household size (2.23) to the average family size (2.98) to find which is larger.
 Action: [basic_math] If the average household size is 2.23 and average family size is 2.98, which is larger?
 Observation: average family size
-Thought: [EOQ]
+Thought: Finish[average family size]
 
-QC: How many North Koreans were killed and captured in total?
+Q: How many North Koreans were killed and captured in total?
 Thought: We first need to find the number of North Koreans who were killed.
 Action: [textqa] How many North Koreans were killed?
 Observation: 110
@@ -65,9 +65,9 @@ Observation: 7
 Thought: Summing them up would give us the total number of North Koreans who were killed and captured.
 Action: [basic_math] What is the total of 110 and 7?
 Observation: 117
-Thought: [EOQ]
+Thought: Finish[117]
 
-QC: How many yards fewer was Prater's last field goal compared to his first?
+Q: How many yards fewer was Prater's last field goal compared to his first?
 Thought: We first need to find the length of Prater's last field goal.
 Action: [textqa] How long was Prater's last field goal?
 Observation: 40-yard
@@ -77,9 +77,9 @@ Observation: 46-yard
 Thought: The difference between these two lengths would give us the answer to the question.
 Action: [textqa] What is the difference between 46-yard and 40-yard?
 Observation: 6
-Thought: [EOQ]
+Thought: Finish[6]
 
-QC: Who caught the longest touchdown reception of the game?
+Q: Who caught the longest touchdown reception of the game?
 Thought: We first need to find the lengths of all touchdown receptions.
 Action: [textqa] Which touchdown receptions were scored?
 Observation: ["11-yards", "33-yard", "6-yard", "17-yard", "15-yard", "3-yard", "20-yard", "4-yard"]
@@ -89,6 +89,6 @@ Observation: 33-yard
 Thought: We now just need to find who caught this touchdown reception to answer the question.
 Action: [textqa] Who caught the 33-yard touchdown reception?
 Observation: Greg Olsen
-Thought: [EOQ]
+Thought: Finish[Greg Olsen]
 
-QC: {{ input_str }}
+Q: {{ input_str }}

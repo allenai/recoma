@@ -8,6 +8,10 @@
 
 # Output dumps
 output/
+html_dump/
+
+# Datasets
+data/
 
 # ViM Specific
 **/*.swp

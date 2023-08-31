@@ -8,7 +8,9 @@ logger = logging.getLogger(__name__)
 
 
 class ClientAPIModel(BaseModel):
-
+    """
+    Simple Base Model that connects to a client at host:port/path
+    """
     def __init__(self, host: str, port: int, path: str, **kwargs):
         super().__init__(**kwargs)
         self.host = host
@@ -19,7 +21,6 @@ class ClientAPIModel(BaseModel):
         r = requests.get('http://{}:{}/{}'.format(self.host, self.port, self.path),
                          params=input_params)
         logger.debug("Requesting: {}".format(r.url))
-        print(r.text)
         return r.text
 
 

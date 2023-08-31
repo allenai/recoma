@@ -1,4 +1,4 @@
-local generator_params = import "../common/default_gpt_davinci003.libsonnet";
+local generator_params = import "../common/default_gpt_gpt3.5.libsonnet";
 {
     "models": {
         "l2m_control": {

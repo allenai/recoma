@@ -5,7 +5,10 @@ from recoma.datasets.reader import DatasetReader, Example
 
 @DatasetReader.register("gsm8k")
 class GSM8KReader(DatasetReader):
-
+    """
+    Dataset reader for the GSM8K dataset format:
+    { "question": "<question>", "answer": "<rationale>####<answer>"
+    """
     def read_examples(self, file: str):
         qid = 0
         with open(file, 'r') as input_fp:

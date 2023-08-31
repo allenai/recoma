@@ -1,6 +1,15 @@
-from treelib import Tree
-
+from recoma.search.answerfromstate import AnswerFromState
 from recoma.search.state import SearchState, SearchNode
+
+
+@AnswerFromState.register("alf_reward")
+class AlfRewardAnswerer(AnswerFromState):
+
+    def __init__(self):
+        super().__init__()
+
+    def generate_answer(self, state: SearchState):
+        return "SUCCESS" if get_reward(state.get_depth_nth_node(-2).data) else "FAILURE"
 
 
 def get_observation(json_data):

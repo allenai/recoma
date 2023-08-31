@@ -1,11 +1,11 @@
 local generator_params = import "../common/default_gpt_davinci002.libsonnet";
 {
     "models": {
-        "decomp_control": {
+        "decomp_letter_cat": {
             "type": "decomp_control",
             "use_number_format": false,
             "decomp_model": "decomp",
-            "qa_model": "router",
+            "qa_model": "qa",
         },
         "decomp": {
             "type": "prompted_lm",
@@ -21,7 +21,7 @@ local generator_params = import "../common/default_gpt_davinci002.libsonnet";
             "type": "decomp_control",
             "use_number_format": false,
             "decomp_model": "str_decomp",
-            "qa_model": "router",
+            "qa_model": "qa",
         },
         "str_decomp": {
             "type": "prompted_lm",
@@ -38,20 +38,19 @@ local generator_params = import "../common/default_gpt_davinci002.libsonnet";
             "prompt_file": "configs/prompts/letter_cat/task_primitives/merge.txt",
             "generator_params": generator_params
         },
-        "router": {
+        "qa": {
             "type": "router"
         }
     },
     "search": {
         "type": "best_first",
-        "start_model": "decomp_control",
+        "start_model": "decomp_letter_cat",
         "answerer": {
             "type": "root"
         }
     },
     "reader": {
-      "type": "drop",
-      "add_paras": true
+      "type": "drop"
     }
 }
 

@@ -12,7 +12,6 @@ local generator_params = import "../common/default_gpt_davinci002.libsonnet";
         "start_model": "answer_only"
     },
     "reader": {
-      "type": "drop",
-      "add_paras": true
+      "type": "drop"
     }
 }

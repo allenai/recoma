@@ -2,30 +2,30 @@ import logging
 from typing import Any
 
 from jinja2 import Template
+
 from recoma.models.core.base_model import BaseModel
 from recoma.models.core.generator import LMGenerator, GenerationOutputs
-
 from recoma.search.state import SearchState
 
 logger = logging.getLogger(__name__)
 
 
-# No need to register this class as it should only be used as a superclass for other models
-class PromptedModel(BaseModel):
-    def __init__(self, prompt_file: str, **kwargs):
+@BaseModel.register("prompted_lm")
+class PromptedLMModel(BaseModel):
+    """
+    Simplest form of a Prompted LM Model. Prompt is read from the prompt_file in the constructor.
+    LMGenerator is constructed using the generator_params dictionary. When called, the prompt is
+    grounded using question, input_str, and paras from the current open node. Prompt is assumed to
+    be a Jinja template. The LMGenerator is then used to generate the output text and set as the
+    output field for the current node and closed.
+    """
+    def __init__(self, prompt_file: str, generator_params, **kwargs):
         super().__init__(**kwargs)
         if prompt_file:
             with open(prompt_file, "r") as input_fp:
                 self.prompt = "".join(input_fp.readlines())
         else:
             self.prompt = ""
-
-
-@BaseModel.register("prompted_lm")
-class PromptedLMModel(PromptedModel):
-
-    def __init__(self, generator_params, **kwargs):
-        super().__init__(**kwargs)
         self.generator = LMGenerator.from_dict(generator_params)
 
     def build_lm_input(self, prompt: str, input_str: str, state: SearchState) -> str:

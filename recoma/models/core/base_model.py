@@ -6,26 +6,41 @@ from recoma.utils.class_utils import RegistrableFromDict
 
 
 class BaseModel(RegistrableFromDict):
-
+    """
+    Base Model class that every agent/controller/tool needs to implement. This model take a search
+    state as input (via the __call__ method) and creates a new list of search states to further
+    explore. A Model is called when the current open node in the search state has been
+    assigned to this base model. Each model must process this open node and create new states by
+    adding new nodes (assigned to other models) to the search state.
+    """
     def __init__(self, next_model: Optional[str] = None):
         self.next_model = next_model
 
-    def __call__(self, state: SearchState):
+    def __call__(self, state: SearchState) -> List[SearchState]:
+        """
+        Simplest but the most common implementation: Generate new text based on the current search
+        state and then create new states based on this output. Can be overwritten in implementations
+        as needed.
+        :param state: input state
+        :return: list of new search states
+        """
         generation_outputs = self.generate_output(state)
         new_states = self.build_new_states(state, generation_outputs)
         return new_states
 
     def generate_output(self, state: SearchState) -> GenerationOutputs:
-        return None
+        # pass through without making any change
+        return GenerationOutputs(outputs=[state.get_open_node().input_str])
 
     def build_new_states(self, state: SearchState,
                          generation_outputs: GenerationOutputs) -> List[SearchState]:
         """
         Build new state from the input search state. Generally, if the output is being consumed by
         the next model, create a new open node as the child of the current open node and assign the
-        new child node to the next model. If the current model has some additional processing after
-        the child node is done (e.g. iterative decomposition), keep the current node open otherwise
-        close it. If there is no next model, just close the node.
+        new child node to the next model. Close the current node if this model is done with its
+        task. But if the current model has some additional tasks after the child node is done (e.g.
+        iteratively generate next question given the answer to previous question), keep the current
+        node open. If there is no next model, just close the node.
         :param state: input state
         :param generation_outputs: output generations based on the input_str (generated using the
         :func:`recoma.BaseModel.generate_output` function)

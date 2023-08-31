@@ -7,8 +7,8 @@ from recoma.search.state import SearchNode
 logger = logging.getLogger(__name__)
 
 
-@BaseModel.register("alf_executer")
-class AlfWorldExecuter(BaseModel):
+@BaseModel.register("alf_react")
+class AlfWorldReactController(BaseModel):
     (THOUGHT, ACTION, OBSERVATION, NUM_STEPS) = list(range(4))
 
     def __init__(self, react_model, action_model,

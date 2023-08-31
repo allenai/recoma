@@ -18,16 +18,31 @@ class ExamplePrediction:
 
 
 class SearchAlgo(RegistrableFromDict):
-    def __init__(self, controller, start_model, answerer=None, max_search_iters=100,
+    def __init__(self, model_list, start_model, answerer=None, max_search_iters=100,
                  max_search_depth=100, output_dir=None, **kwargs):
         super().__init__(**kwargs)
-        self.controller = controller
+        self.model_list = model_list
         self.answerer = TailOutputAnswerer() if answerer is None \
             else AnswerFromState.from_dict(answerer)
         self.start_model = start_model
         self.max_search_iters = max_search_iters
         self.max_search_depth = max_search_depth
         self.output_dir = output_dir
+
+    def execute(self, current_state: SearchState):
+        open_node = current_state.get_open_node()
+        if open_node is not None:
+            target_model = open_node.target_model()
+            if target_model not in self.model_list:
+                logger.error("Can not handle next state: " + str(target_model))
+                return []
+            try:
+                output_states = self.model_list[target_model](current_state)
+                return output_states
+            except RecursionError:
+                return []
+        else:
+            raise ValueError("No open nodes in current state:" + str(current_state))
 
     def predict(self, example: Example) -> ExamplePrediction:
         return NotImplementedError
@@ -41,10 +56,10 @@ def clean_name(qid):
 class BestFirstSearch(SearchAlgo):
 
     def predict(self, example):
-
         init_state = SearchState(example=example)
         # add root node
         init_state.add_next_step(next_step_input=example.question,
+                                 next_step_input_for_display=example.question,
                                  next_step_model=self.start_model,
                                  current_step_node=None)
         heap = []
@@ -72,7 +87,7 @@ class BestFirstSearch(SearchAlgo):
                 logger.debug("Exploring ====> " + current_state.get_open_node().tag)
 
             # generate new states
-            for new_state in self.controller.execute(current_state):
+            for new_state in self.execute(current_state):
                 # push onto heap if max depth not reached
                 if new_state.depth() <= self.max_search_depth:
                     heapq.heappush(heap, new_state)

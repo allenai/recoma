@@ -10,7 +10,6 @@ import gradio as gr
 
 from recoma.datasets.reader import Example, DatasetReader
 from recoma.models.core.base_model import BaseModel
-from recoma.search.controller import Controller
 from recoma.search.search import SearchAlgo, ExamplePrediction
 from recoma.utils.env_utils import get_environment_variables
 
@@ -21,7 +20,6 @@ logger = logging.getLogger(__name__)
 class ConfigurableSystems:
     source_json: str
     reader: DatasetReader
-    controller: Controller
     search: SearchAlgo
 
 
@@ -59,12 +57,11 @@ def build_configurable_systems(config_file, output_dir):
     for k, v in config_map["models"].items():
         # initialize models
         model_map[k] = BaseModel.from_dict(v)
-    controller = Controller(model_list=model_map)
-
-    search = SearchAlgo.from_dict({"controller": controller, "output_dir": output_dir} |
+    Path(output_dir + "/html_dump").mkdir(parents=True, exist_ok=True)
+    search = SearchAlgo.from_dict({"model_list": model_map,
+                                   "output_dir": output_dir + "/html_dump/"} |
                                   config_map["search"])
-    return ConfigurableSystems(source_json=source_json, reader=reader, controller=controller,
-                               search=search)
+    return ConfigurableSystems(source_json=source_json, reader=reader, search=search)
 
 
 def demo_mode(args, configurable_systems: ConfigurableSystems):
@@ -119,15 +116,16 @@ def inference_mode(args, configurable_systems: ConfigurableSystems):
             example_predictions.append(search_algo.predict(example))
     dump_predictions(args, example_predictions)
 
+
 def dump_predictions(args, example_predictions: List[ExamplePrediction]):
-    Path(args.output_dir + "/tree_dump").mkdir(parents=True, exist_ok=True)
+    # Path(args.output_dir + "/tree_dump").mkdir(parents=True, exist_ok=True)
     if args.dump_prompts:
         Path(args.output_dir + "/prompts_dump").mkdir(parents=True, exist_ok=True)
     # Dump trees and I/O Prompts
     for ex in example_predictions:
-        with open(args.output_dir + "/tree_dump/" + ex.example.qid + ".json", "w") as output_fp:
-            if ex.final_state:
-                output_fp.write(ex.final_state.to_json_tree())
+        # with open(args.output_dir + "/tree_dump/" + ex.example.qid + ".json", "w") as output_fp:
+        #     if ex.final_state:
+        #         output_fp.write(ex.final_state.to_json_tree())
         if args.dump_prompts:
             with open(args.output_dir + "/prompts_dump/" + ex.example.qid + "_prompts.txt",
                       "w") as output_fp:

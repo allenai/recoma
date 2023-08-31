@@ -6,22 +6,21 @@ local generator_params = import "../common/default_gpt_davinci002.libsonnet";
             "host": "localhost",
             "port": 5001,
             "path": "play",
-            "next_model": "react_control"
+            "next_model": "alf_react"
         },
-        "react_control": {
-            "type": "react_controller",
-            "react_model": "react",
-            "action_model": "alfapi",
-            "action_prefix": ">",
-            "obs_prefix": "",
-            "skip_thought_step": true
+        "alf_react": {
+            "type": "alf_react",
+            "react_model": "react_act",
+            "action_model": "alf_obs",
+            "eoq_string": "[EOQ]",
+            "max_steps": 100
         },
-        "react": {
+        "react_act": {
             "type": "prompted_lm",
-            "prompt_file": "configs/prompts/alfworld/react_orig.txt",
+            "prompt_file": "configs/prompts/alfworld/react_orig_heat_examine.txt",
             "generator_params": generator_params,
         },
-        "alfapi": {
+        "alf_obs": {
             "type": "alf_action",
             "host": "localhost",
             "port": 5001,

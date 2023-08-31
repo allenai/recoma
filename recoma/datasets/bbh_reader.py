@@ -6,7 +6,8 @@ from recoma.datasets.reader import DatasetReader, Example
 @DatasetReader.register("bbh")
 class BBHReader(DatasetReader):
     """
-    Note that this is a reader for the BBH-formatted data with the format:
+    Dataset reader for the BBH-formatted data from https://github.com/suzgunmirac/BIG-Bench-Hard/
+    with the format:
         ```
             "examples": [
                 {

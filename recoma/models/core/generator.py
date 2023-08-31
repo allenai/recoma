@@ -1,3 +1,4 @@
+from abc import abstractmethod
 from dataclasses import dataclass, field
 from typing import Any
 
@@ -26,9 +27,17 @@ class GenerationOutputs:
 
 
 class LMGenerator(RegistrableFromDict):
-
+    """"
+    Base LM Generator class. All text-to-text generators should inherit this base registrable class
+    and implement the generate method
+    """
     def __init__(self, **kwargs):
         self.generator_params = GeneratorParams(**kwargs)
 
+    @abstractmethod
     def generate(self, input_str: str) -> GenerationOutputs:
+        """
+        All implementations must implement this generate function that takes input text and returns
+        string as output
+        """
         raise NotImplementedError
