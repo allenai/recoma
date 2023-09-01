@@ -11,6 +11,7 @@ import gradio as gr
 from recoma.datasets.reader import Example, DatasetReader
 from recoma.models.core.base_model import BaseModel
 from recoma.search.search import SearchAlgo, ExamplePrediction
+from recoma.utils.class_utils import import_module_and_submodules
 from recoma.utils.env_utils import get_environment_variables
 
 logger = logging.getLogger(__name__)
@@ -36,8 +37,8 @@ def parse_arguments():
                             help="Gradio Demo mode")
     arg_parser.add_argument('--dump_prompts', action='store_true', default=False,
                             help="Dump input prompts -> output in output directory.")
-    arg_parser.add_argument('--threads', default=1, type=int,
-                            help="Number of threads (use MP if set to >1)")
+    arg_parser.add_argument("--include-package", type=str, action="append", default=[],
+                            help="additional packages to include")
     return arg_parser.parse_args()
 
 
@@ -105,15 +106,8 @@ def inference_mode(args, configurable_systems: ConfigurableSystems):
     Path(args.output_dir).mkdir(parents=True, exist_ok=True)
     with open(args.output_dir + "/source_config.json", "w") as output_fp:
         output_fp.write(json.dumps(configurable_systems.source_json, indent=2))
-    if args.threads > 1:
-        import multiprocessing as mp
-        mp.set_start_method("spawn")
-        with mp.Pool(args.threads) as p:
-            example_predictions = p.map(search_algo.predict,
-                                        reader.get_examples(args.input))
-    else:
-        for example in reader.get_examples(args.input):
-            example_predictions.append(search_algo.predict(example))
+    for example in reader.get_examples(args.input):
+        example_predictions.append(search_algo.predict(example))
     dump_predictions(args, example_predictions)
 
 
@@ -123,9 +117,6 @@ def dump_predictions(args, example_predictions: List[ExamplePrediction]):
         Path(args.output_dir + "/prompts_dump").mkdir(parents=True, exist_ok=True)
     # Dump trees and I/O Prompts
     for ex in example_predictions:
-        # with open(args.output_dir + "/tree_dump/" + ex.example.qid + ".json", "w") as output_fp:
-        #     if ex.final_state:
-        #         output_fp.write(ex.final_state.to_json_tree())
         if args.dump_prompts:
             with open(args.output_dir + "/prompts_dump/" + ex.example.qid + "_prompts.txt",
                       "w") as output_fp:
@@ -178,11 +169,9 @@ def gradio_demo_fn(args, configurable_systems: ConfigurableSystems,
            (predictions.final_state.to_html_tree() if predictions.final_state else "")
 
 
-def build_gradio_interface():
+def build_gradio_interface(parsed_args, config_sys):
     gradio_fn = lambda qid, question, context: gradio_demo_fn(parsed_args, config_sys,
                                                               qid, question, context)
-    # demo = gr.Interface(fn=gradio_fn,
-    #                     inputs=["text", "text", "text"], outputs=["json", "html"])
     with gr.Blocks() as demo:
         qid = gr.Textbox(max_lines=1, label="QID")
         question = gr.Textbox(max_lines=1, label="Question")
@@ -199,20 +188,28 @@ def build_gradio_interface():
     return demo
 
 
-if __name__ == "__main__":
-
+def main():
     parsed_args = parse_arguments()
     logging.basicConfig(level=logging.ERROR)
+
     if parsed_args.debug:
         logging.getLogger('recoma').setLevel(level=logging.DEBUG)
+
+    if parsed_args.include_package:
+        for pkg in parsed_args.include_package:
+            import_module_and_submodules(package_name=pkg)
 
     config_sys = build_configurable_systems(parsed_args.config, parsed_args.output_dir)
 
     if parsed_args.demo:
         demo_mode(args=parsed_args, configurable_systems=config_sys)
     elif parsed_args.gradio_demo:
-        interface = build_gradio_interface()
+        interface = build_gradio_interface(parsed_args=parsed_args, config_sys=config_sys)
         # DON'T SET share=True
         interface.launch(server_name="0.0.0.0")
     else:
         inference_mode(args=parsed_args, configurable_systems=config_sys)
+
+
+if __name__ == "__main__":
+    main()

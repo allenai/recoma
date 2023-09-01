@@ -2,10 +2,10 @@ import re
 from dataclasses import dataclass
 from typing import List
 
-from recoma.alfworld.alf_utils import set_observation, get_task_success_from_state, extract_task
+from alfworld.alf_utils import set_observation, get_task_success_from_state, extract_task
 from recoma.models.core.base_model import BaseModel
 from recoma.models.core.generator import GenerationOutputs
-from recoma.models.core.prompted_model import PromptedLMModel
+from recoma.models.core.prompted_lm_model import PromptedLMModel
 from recoma.search.state import SearchState
 
 

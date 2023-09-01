@@ -5,6 +5,8 @@
 
 # Python specific
 *.pyc
+*.egg-info/
+build/
 
 # Output dumps
 output/
