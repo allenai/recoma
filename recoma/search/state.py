@@ -1,4 +1,5 @@
-from typing import Optional, Any
+from multiprocessing import Value
+from typing import Optional, Any, List
 
 from treelib import Tree, Node
 
@@ -8,7 +9,7 @@ from recoma.models.core.generator import GenerationOutputs
 
 class SearchNode(Node):
     def __init__(self, input_str: str, target_model: str, input_str_for_display=None,
-                 is_open: bool = True, output: str = None, data={}):
+                 is_open: bool = True, output: Optional[str] = None, data={}):
         """
         Node in the SearchState tree
         :param input_str: Input string provided by the parent
@@ -45,7 +46,7 @@ class SearchNode(Node):
         if self.is_open():
             label += "*"
         display_str = self.input_str_for_display or self.input_str
-        if self.output:
+        if self.output is not None:
             if self.input_str_for_display:
                 label += "<" + self.target + "> " + self.input_str_for_display + " => " + self.output
             else:
@@ -62,10 +63,10 @@ class SearchNode(Node):
             if self.is_open():
                 summary += "<u>&lt;" + self.target + "&gt;</u> "
             else:
-                summary += "<b>&lt;" + self.target + "&gt;</b> "
+                summary += "<span class=\"model_name\">" + self.target + "</span>"
             if self.input_str_for_display:
                 summary += self.input_str_for_display + " => "
-            if self.output:
+            if self.output is not None:
                 summary += self.output.replace("\n", "\n<br>")
             else:
                 summary += " ... "
@@ -88,6 +89,8 @@ class SearchNode(Node):
             """.format(summary, details)
 
     def add_input_output_prompt(self, input_str: str, output: GenerationOutputs):
+        if self.data is None:
+            self.data = {}
         if "prompts" not in self.data:
             self.data["prompts"] = []
         self.data["prompts"].append((
@@ -97,7 +100,7 @@ class SearchNode(Node):
 
     def get_input_output_prompts(self):
         output = ""
-        if "prompts" in self.data:
+        if self.data and "prompts" in self.data:
             for input_str, output_strs in self.data["prompts"]:
                 output += "Input:\n" + input_str + "\n     ==>\n"
                 for output_str in output_strs:
@@ -119,16 +122,14 @@ class SearchState(Tree):
         return SearchState(example=self.example, score=self.score,
                            identifier=identifier, deep=deep, tree=self if with_tree else None)
 
-    def get_open_node(self) -> SearchNode:
+    def get_open_node(self) -> Optional[SearchNode]:
         # TODO Cache the depth first open node value. This is tricky because any non-local change
         # can change the first open node
         return self.get_depth_first_open_node()
 
     def get_depth_first_open_node(self) -> Optional[SearchNode]:
         for node_id in self.postorder_traversal():
-            # print(self[node_id].tag)
             if node_id is not None and self[node_id].is_open():
-                # print("Found node_id: " + str(node_id))
                 return self[node_id]
         return None
 
@@ -152,10 +153,32 @@ class SearchState(Tree):
         footer = ""
         if parent is None:
             parent = self.get_node(self.root)
+            if parent is None:
+                raise ValueError("No root for tree!")
             header = """<style type="text/css">
                           details > *:not(summary){
                           margin-left: 2em;
                          }
+                        .model_name {
+                          display: inline-block;
+                          padding: 1px 2px;
+                          margin-right: 3px;
+                          border-radius: 2px;
+                          background-color: #85C1E9;
+                          color: #000000;
+                          border-color: #000000;
+                          border: solid;
+                          border-radius: 3px;
+                          border-width: 1px;
+                          text-decoration: none;
+                          font-weight: bold;
+                          text-align: center;
+                          cursor: pointer;
+                        }
+
+                        .model_name:hover {
+                          background-color: #cccccc;
+                        }
                         </style>  
             """
             footer = ""
@@ -164,14 +187,14 @@ class SearchState(Tree):
             children_repr += self.to_html_tree(child) + "\n"
 
         if children_repr:
-            tree_repr = """<details>
+            tree_repr = """<p style=\"margin:1px;\"><details>
                           <summary>{}</summary>
                           {}
-                       </details>
+                       </details></p>
                    """.format(parent.to_html_node(),
                               children_repr)
         else:
-            tree_repr = "&#x2022;{}".format(parent.to_html_node())
+            tree_repr = "<p style=\"margin:1px; margin-left: 3em;\">{}</p>".format(parent.to_html_node())
         return header + tree_repr + footer
 
     def all_input_output_prompts(self) -> str:
@@ -190,14 +213,19 @@ class SearchState(Tree):
         """
         return self.is_branch(parent_id)
 
-    def get_children(self, parent_node: SearchNode):
-        return [self.get_node(nid) for nid in self.get_children_ids(parent_node.identifier)]
+    def get_children(self, parent_node: SearchNode) -> List[SearchNode]:
+        result = []
+        for nid in self.get_children_ids(parent_node.identifier):
+            if self.get_node(nid) is None:
+                raise ValueError("Node: {} not found in tree!".format(nid))
+            result.append(self.get_node(nid))
+        return result
 
     def add_next_step(self, next_step_input: str,
                       next_step_model: str,
                       current_step_node: SearchNode,
-                      next_step_input_for_display: str = None,
-                      metadata: dict[str, Any] = None):
+                      next_step_input_for_display: Optional[str] = None,
+                      metadata: Optional[dict[str, Any]] = None):
         # The default fn argument will be shared across calls, so don't set default value to {}
         if metadata is None:
             metadata = {}

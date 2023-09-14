@@ -38,6 +38,8 @@ class ReactController(BaseModel):
     def __call__(self, state):
         new_state = state.clone(deep=True)
         current_node = new_state.get_open_node()
+        if current_node is None:
+            raise ValueError("Model called without any open node!!")
         children = new_state.children(current_node.identifier)
 
         # Start with thought

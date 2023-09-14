@@ -34,6 +34,8 @@ class LeastToMostController(BaseModel):
     def __call__(self, state: SearchState):
         new_state = state.clone(deep=True)
         current_node = new_state.get_open_node()
+        if current_node is None:
+            raise ValueError("Model called without any open node!!")
         children = new_state.get_children(current_node)
         if len(children) == 0:
             # Decompose

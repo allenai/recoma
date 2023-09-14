@@ -26,6 +26,8 @@ class RegexExtractor(BaseModel):
 
     def generate_output(self, state):
         open_node = state.get_open_node()
+        if open_node is None:
+            raise ValueError("Model called without any open node!!")
         input_str = open_node.input_str
         m = self.regex.match(input_str)
         if m:
@@ -52,6 +54,8 @@ class RouterModel(BaseModel):
     def __call__(self, state: SearchState) -> List[SearchState]:
         new_state = state.clone(deep=True)
         current_node = new_state.get_open_node()
+        if current_node is None:
+            raise ValueError("Model called without any open node!!")
         children = new_state.get_children(current_node)
         # Route question to appropriate model
         if len(children) == 0:

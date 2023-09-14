@@ -9,7 +9,7 @@ class AlfRewardAnswerer(AnswerFromState):
         super().__init__()
 
     def generate_answer(self, state: SearchState):
-        return "SUCCESS" if get_reward(state.get_depth_nth_node(-2).data) else "FAILURE"
+        return "SUCCESS" if get_reward(state.get_depth_nth_node(-3).data) else "FAILURE"
 
 
 def get_observation(json_data):

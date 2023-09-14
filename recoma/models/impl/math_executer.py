@@ -33,6 +33,8 @@ class MathProgramExecuter(BaseModel):
 
     def generate_output(self, state: SearchState) -> GenerationOutputs:
         curr_node = state.get_open_node()
+        if curr_node is None:
+            raise ValueError("Model called without any open node!!")
         input_prog = curr_node.input_str
         output = self.eval_program(input_prog)
         return GenerationOutputs(outputs=[output])

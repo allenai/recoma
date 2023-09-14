@@ -58,6 +58,8 @@ class PromptedLMModel(BaseModel):
         :return: generator outputs
         """
         open_node = state.get_open_node()
+        if open_node is None:
+            raise ValueError("Model called without any open node!!")
         lm_input = self.build_lm_input(self.prompt, open_node.input_str, state)
         output = self.generator.generate(lm_input)
         logger.debug("Input: ..." + lm_input[-200:])

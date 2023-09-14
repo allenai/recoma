@@ -1,6 +1,6 @@
 import json
 import logging
-
+import re
 from alfworld.alf_utils import set_observation, get_task_success_from_state, extract_task
 from recoma.models.core.api_models import ClientAPIModel
 from recoma.models.core.base_model import BaseModel
@@ -35,17 +35,27 @@ class AlfWorldConditionalExecuter(BaseModel):
         logger.debug(output_json["obs"])
         return output_json["info"]
 
+    def add_question(self, new_goal, original_question):
+        modified_question = re.sub("Your task is to: .*\\.",
+                                   "Your task is to: {}".format(new_goal),
+                                   original_question)
+        return modified_question
+
     def __call__(self, state):
         new_state = state.clone(deep=True)
         current_node = new_state.get_open_node()
         children_nodes = new_state.get_children(current_node)
+        input_string = current_node.input_str
+        if "Your task is to" not in input_string:
+            input_string = self.add_question(new_goal=input_string,
+                                             original_question=state.example.question)
         if len(children_nodes) == 0:
             # try model not attempted
             save_id = self.save_alf_state()
             current_node.data["save_id"] = save_id
-            new_state.add_next_step(next_step_input=current_node.input_str,
+            new_state.add_next_step(next_step_input=input_string,
                                     next_step_input_for_display=extract_task(
-                                        current_node.input_str),
+                                        input_string),
                                     next_step_model=self.executer_model,
                                     current_step_node=current_node)
             return [new_state]
@@ -57,16 +67,21 @@ class AlfWorldConditionalExecuter(BaseModel):
                 current_node.close(executor_node.output)
                 return [new_state]
             else:
-                # failure! need to try except model
+                # failure! need to try except model assuming max depth has not been reached
                 # first load from checkpoint
                 save_id = current_node.data["save_id"]
                 self.load_alf_state(save_id)
-                new_state.add_next_step(next_step_input=current_node.input_str,
-                                        next_step_input_for_display=extract_task(
-                                            current_node.input_str),
-                                        next_step_model=self.planner_model,
-                                        current_step_node=current_node)
-                return [new_state]
+                if new_state.depth() > 5:
+                    set_observation(current_node, "Task failed!")
+                    current_node.close(executor_node.output)
+                    return [new_state]
+                else:
+                    new_state.add_next_step(next_step_input=input_string,
+                                            next_step_input_for_display=extract_task(
+                                                input_string),
+                                            next_step_model=self.planner_model,
+                                            current_step_node=current_node)
+                    return [new_state]
         elif len(children_nodes) == 2:
             # except model attempted, check if it succeeded
             planner_node = children_nodes[1]

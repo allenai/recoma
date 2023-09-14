@@ -30,7 +30,12 @@ class BaseModel(RegistrableFromDict):
 
     def generate_output(self, state: SearchState) -> GenerationOutputs:
         # pass through without making any change
-        return GenerationOutputs(outputs=[state.get_open_node().input_str])
+        open_node = state.get_open_node()
+        if open_node is not None:
+            output_str = open_node.input_str
+        else:
+            raise ValueError("Model called without any open node!!")
+        return GenerationOutputs(outputs=[output_str])
 
     def build_new_states(self, state: SearchState,
                          generation_outputs: GenerationOutputs) -> List[SearchState]:
@@ -50,6 +55,8 @@ class BaseModel(RegistrableFromDict):
         for idx, output_str in enumerate(generation_outputs.outputs):
             new_state = state.clone(deep=True)
             current_node = new_state.get_open_node()
+            if current_node is None:
+                raise ValueError("Model called without any open node!!")
             current_node.close(output=output_str)
             if generation_outputs.metadata:
                 current_node.data.update(generation_outputs.metadata[idx])

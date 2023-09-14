@@ -22,7 +22,7 @@ class SearchAlgo(RegistrableFromDict):
                  max_search_depth=100, output_dir=None, **kwargs):
         super().__init__(**kwargs)
         self.model_list = model_list
-        self.answerer = TailOutputAnswerer() if answerer is None \
+        self.answerer: AnswerFromState = TailOutputAnswerer() if answerer is None \
             else AnswerFromState.from_dict(answerer)
         self.start_model = start_model
         self.max_search_iters = max_search_iters
@@ -45,7 +45,7 @@ class SearchAlgo(RegistrableFromDict):
             raise ValueError("No open nodes in current state:" + str(current_state))
 
     def predict(self, example: Example) -> ExamplePrediction:
-        return NotImplementedError
+        raise NotImplementedError
 
 
 def clean_name(qid):
