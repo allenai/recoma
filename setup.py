@@ -55,7 +55,7 @@ setup(
     install_requires=read_reqs_file("requirements.txt"),
     entry_points={  # Optional
         "console_scripts": [
-            "recoma_inference=recoma.run_inference:main",
+            "recoma.run_inference=recoma.run_inference:main",
         ],
     }
 )

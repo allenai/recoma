@@ -27,7 +27,7 @@ class ConfigurableSystems:
 def parse_arguments():
     arg_parser = argparse.ArgumentParser(description='Run inference')
     arg_parser.add_argument('--input', type=str, required=False, help="Input file")
-    arg_parser.add_argument('--output_dir', type=str, required=False, help="Output directory")
+    arg_parser.add_argument('--output_dir', type=str, required=True, help="Output directory")
     arg_parser.add_argument('--config', type=str, required=True, help="Model and Inference config")
     arg_parser.add_argument('--debug', action='store_true', default=False,
                             help="Debug output")
@@ -136,7 +136,11 @@ def dump_predictions(args, example_predictions: List[ExamplePrediction]):
                 pred_json = x.prediction
             all_data_dict = x.example.__dict__
             all_data_dict["predicted"] = pred_json
-            score = 1 if (x.prediction == x.example.gold_answer) else 0
+            if isinstance(x.example.gold_answer, list) and len(x.example.gold_answer) == 1:
+                gold_answer = x.example.gold_answer[0]
+            else:
+                gold_answer = x.example.gold_answer
+            score = 1 if (x.prediction == gold_answer) else 0
             all_data_dict["correct"] = str(score)
             total_score += score
             all_data_fp.write(json.dumps(all_data_dict) + "\n")
