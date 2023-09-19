@@ -8,7 +8,7 @@ A: "a"
 QS: [str_position] What is the last letter in "King"?
 A: "g"
 QS: [merge] Concatenate ["a", "a", "g"] using a space.
-A: "a a g"
+A: a a g
 QS: [EOQ]
 
 QC: Take the letters at position 1 of the words in "Alan Mathison Turing" and concatenate them using a space.
@@ -21,7 +21,7 @@ A: "M"
 QS: [str_position] What is the letter at position 1 in "Turing"?
 A: "T"
 QS: [merge] Concatenate ["A", "M", "T"] using a space.
-A: "A M T"
+A: A M T
 QS: [EOQ]
 
 QC: Take the letters at position 4 of the words in "Herbert Alexander Simon" and concatenate them using a space.
@@ -34,7 +34,7 @@ A: "x"
 QS: [str_position] What is the letter at position 4 in "Simon"?
 A: "o"
 QS: [merge] Concatenate ["b", "x", "o"] using a space.
-A: "b x o"
+A: b x o
 QS: [EOQ]
 
 {{ input_str }}

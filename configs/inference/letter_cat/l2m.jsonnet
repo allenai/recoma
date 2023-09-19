@@ -19,7 +19,7 @@ local generator_params = import "../common/default_gpt_davinci002.libsonnet";
         },
         "answer_ext": {
             "type": "regex_ext",
-            "regex": ".* outputs (.*)\\.",
+            "regex": ".* outputs \"(.*)\"\\.",
         }
     },
     "search": {
