@@ -15,7 +15,7 @@ local generator_params = import "../common/default_gpt_davinci002.libsonnet";
         "l2m_qa": {
             "type": "prompted_lm",
             "prompt_file": "configs/prompts/letter_cat/l2m_qa.txt",
-            "generator_params": generator_params + { "max_tokens": 200 },
+            "generator_params": generator_params + { "max_tokens": 300 },
         },
         "answer_ext": {
             "type": "regex_ext",

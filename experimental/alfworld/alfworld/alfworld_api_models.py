@@ -1,7 +1,7 @@
 import json
 
 from alfworld.alf_utils import get_observation
-from recoma.models.core.api_models import ClientAPIModel
+from experimental.alfworld.alfworld.api_models import ClientAPIModel
 from recoma.models.core.base_model import BaseModel
 from recoma.models.core.generator import GenerationOutputs
 from recoma.search.state import SearchState

@@ -9,7 +9,7 @@ class LeastToMostController(BaseModel):
 
     def __init__(self, l2m_decomp_model: str, l2m_qa_model: str,
                  step_regex="To answer the question \"(.*)\", we need to know: (.*)",
-                 ques_regex="\"(.*?)\"[,.]",
+                 ques_regex="\"(.*?)\"(?:,|\\.|$)",
                  **kwargs):
         super().__init__(**kwargs)
         self.step_regex = re.compile(step_regex)

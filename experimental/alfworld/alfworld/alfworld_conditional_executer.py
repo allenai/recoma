@@ -2,7 +2,7 @@ import json
 import logging
 import re
 from alfworld.alf_utils import set_observation, get_task_success_from_state, extract_task
-from recoma.models.core.api_models import ClientAPIModel
+from experimental.alfworld.alfworld.api_models import ClientAPIModel
 from recoma.models.core.base_model import BaseModel
 
 logger = logging.getLogger(__name__)
