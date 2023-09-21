@@ -78,10 +78,10 @@ dataset with 4 words](https://github.com/allenai/DecomP/blob/main/datasets/lette
 ```
 
 Running this script will populate the output directory with :
-- predictions.json: qid-to-prediction map
-- all_data.jsonl: Input examples with model predictions and correctness label (using exact match)
-- html_dump/: Dump of the execution traces for all the examples in HTML format
-- source_config.json: JSON config used to run this experiment (for future reproducibility)
+- `predictions.json`: qid-to-prediction map
+- `all_data.jsonl`: Input examples with model predictions and correctness label (using exact match)
+- `html_dump/`: Dump of the execution traces for all the examples in HTML format
+- `source_config.json`: JSON config used to run this experiment (for future reproducibility)
 
 ## Using ReComA in your work
 
