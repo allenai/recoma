@@ -61,10 +61,11 @@ class LeastToMostController(BaseModel):
             else:
                 curr_question = questions[len(children) - 1]
                 if len(children) > 1:
-                    new_input = children[-1].input_str + " " + children[-1].output
+                    new_input = children[-1].input_str + " " + children[-1].output + "\n\n"
                 else:
-                    new_input = current_node.input_str
-                new_state_input_str = new_input + "\n" + "Q: " + curr_question + "\n" + \
+                    # Adding paras or question should be part of the prompt
+                    new_input = ""
+                new_state_input_str = new_input + "Q: " + curr_question + "\n" + \
                                       "A:"
                 new_state_input_str_for_display = "..." + \
                                                   "Q: " + curr_question + "\n" + "A:"
