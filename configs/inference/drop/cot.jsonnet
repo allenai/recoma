@@ -4,7 +4,7 @@ local generator_params = import "../common/default_gpt_davinci002.libsonnet";
         "cot": {
             "type": "prompted_lm",
             "prompt_file": "configs/prompts/drop/cot.txt",
-            "generator_params": generator_params,
+            "generator_params": generator_params + { "max_tokens": 300 },
             "next_model": "answer_ext"
         },
         "answer_ext": {

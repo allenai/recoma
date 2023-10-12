@@ -21,15 +21,25 @@ cache = Cache(os.path.expanduser("~/.cache/gpt3calls"))
 
 @cache.memoize()
 def cached_openai_call(  # kwargs doesn't work with caching
-        prompt, engine, temperature, max_tokens, top_p,
+        prompt, model, temperature, max_tokens, top_p,
         frequency_penalty, presence_penalty, stop,
         n, best_of, logprobs,
 ):
-    return openai.Completion.create(
-        prompt=prompt, engine=engine, temperature=temperature, max_tokens=max_tokens,
-        top_p=top_p, frequency_penalty=frequency_penalty, presence_penalty=presence_penalty,
-        stop=stop, n=n, best_of=best_of, logprobs=logprobs
-    )
+
+    if best_of is None:
+        # only add this parameter if needed. Does not accept None and passing default=1 will still
+        # trigger a check for n < best_of
+        return openai.Completion.create(
+            prompt=prompt, model=model, temperature=temperature, max_tokens=max_tokens,
+            top_p=top_p, frequency_penalty=frequency_penalty, presence_penalty=presence_penalty,
+            stop=stop, n=n, logprobs=logprobs
+        )
+    else:
+        return openai.Completion.create(
+            prompt=prompt, model=model, temperature=temperature, max_tokens=max_tokens,
+            top_p=top_p, frequency_penalty=frequency_penalty, presence_penalty=presence_penalty,
+            stop=stop, n=n, best_of=best_of, logprobs=logprobs
+        )
 
 
 def generator_params_to_args(generator_params, is_chat_model=False):
@@ -41,26 +51,19 @@ def generator_params_to_args(generator_params, is_chat_model=False):
         "logprobs": generator_params.topk_logprobs,
         "frequency_penalty": generator_params.frequency_penalty,
         "presence_penalty": generator_params.presence_penalty,
-        "stop": generator_params.stop
+        "stop": generator_params.stop,
+        "best_of": generator_params.best_of
     }
-    # only add this parameter if needed. Does not accept None and passing default=1 will still
-    # trigger a check for n < best_of
-    if generator_params.best_of is not None:
-        kwargs["best_of"] = generator_params.best_of
 
-    # remove args that don't apply to chat models
-    if is_chat_model:
-        del kwargs["best_of"]
-        del kwargs["logprobs"]
     return kwargs
 
 
 @LMGenerator.register("openai_completion")
 class GPT3CompletionGenerator(LMGenerator):
 
-    def __init__(self, engine: str, use_cache=True, **kwargs):
+    def __init__(self, model: str, use_cache=True, **kwargs):
         super().__init__(**kwargs)
-        self.engine = engine
+        self.model = model
         self.use_cache = use_cache
 
     @retry(wait=wait_random_exponential(min=1, max=20), stop=stop_after_attempt(20),
@@ -78,14 +81,14 @@ class GPT3CompletionGenerator(LMGenerator):
 
         generator_args = generator_params_to_args(self.generator_params)
         generator_args["prompt"] = prompt
-        generator_args["engine"] = self.engine
+        generator_args["model"] = self.model
         response: dict[Any, Any] = self.completion_with_backoff(
             function=function, **generator_args)
-
+        # print(response)
         generation_outputs = GenerationOutputs(outputs=[], scores=[])
 
         for index, choice in enumerate(response["choices"]):
-            if "logprobs" in choice and "token_logprobs" in choice["logprobs"]:
+            if "logprobs" in choice and choice["logprobs"] is not None and "token_logprobs" in choice["logprobs"]:
                 # get probs of the tokens used in text (i.e. till the stop token)
                 probs = []
                 for prob, tok in zip(choice["logprobs"]["token_logprobs"],
@@ -128,9 +131,9 @@ def cached_openai_chat_call(  # kwargs doesn't work with caching
 @LMGenerator.register("openai_chat")
 class GPT3ChatGenerator(LMGenerator):
 
-    def __init__(self, engine: str, use_cache=False, **kwargs):
+    def __init__(self, model: str, use_cache=False, **kwargs):
         super().__init__(**kwargs)
-        self.engine = engine
+        self.model = model
         self.use_cache = use_cache
 
     @retry(wait=wait_random_exponential(min=1, max=60), stop=stop_after_attempt(10),
@@ -151,9 +154,13 @@ class GPT3ChatGenerator(LMGenerator):
         else:
             function = openai.ChatCompletion.create
 
-        generator_args = generator_params_to_args(self.generator_params, is_chat_model=True)
+        generator_args = generator_params_to_args(self.generator_params)
         generator_args["messages"] = messages_json
-        generator_args["model"] = self.engine
+        generator_args["model"] = self.model
+        # remove args that don't apply to chat models
+        del generator_args["best_of"]
+        del generator_args["logprobs"]
+
         response: dict[Any, Any] = self.completion_with_backoff(
             function=function, **generator_args)
 
