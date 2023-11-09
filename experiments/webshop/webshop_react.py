@@ -59,8 +59,10 @@ class WebShopReactController(BaseModel):
             # If the previous step was an action step
             if last_step == self.ACTION:
                 last_action = last_child.output
+                # No more actions?
                 if last_action == self.eoq:
-                    current_node.close(output=last_action)
+                    last_observation = children[-2].output
+                    current_node.close(output=last_observation)
                     return [new_state]
                 # Add an open node to generate observation using the action_model
                 new_state.add_next_step(next_step_input=last_action,

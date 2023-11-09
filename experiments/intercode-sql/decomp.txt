@@ -1,0 +1,10 @@
+QS: SHOW TABLES;
+A: 
+QS: DESC ;
+A:
+QS: DESC ;
+A:
+QS: 
+
+
+{{ input_str }}

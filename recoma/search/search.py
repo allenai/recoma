@@ -98,7 +98,7 @@ class BestFirstSearch(SearchAlgo):
             if len(heap) == 0:
                 return ExamplePrediction(example=example, prediction="", final_state=current_state)
             iters += 1
-
+        logger.debug("Hit max iterations: {}".format(self.max_search_iters))
         return ExamplePrediction(example=example,
                                  prediction="SEARCH FAILED",
                                  final_state=heapq.heappop(heap))

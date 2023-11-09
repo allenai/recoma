@@ -3,7 +3,7 @@ local generator_params = import "default_gpt_davinci003.libsonnet";
     "models": {
         "webshop_init": {
             "type": "webshop_loader",
-            "host": "aristo-cirrascale-13.reviz.ai2.in",
+            "host": std.extVar("WEBSHOP_HOST"),
             "port": 3000,
             "next_model": "react_control"
         },
@@ -25,11 +25,14 @@ local generator_params = import "default_gpt_davinci003.libsonnet";
         "type": "best_first",
         "start_model": "webshop_init",
         "answerer": {
-            "type": "root"
+            "type": "tail",
+            "n_tail": -2
         }
     },
     "reader": {
-      "type": "webshop"
+      "type": "webshop",
+      "start_num": 100, 
+      "end_num": 110
     }
 }
 

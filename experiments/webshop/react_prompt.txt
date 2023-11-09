@@ -1,3 +1,5 @@
+You are an agent interacting with a web-shopping site "webshop". Your observations will be the webpage. Perform actions based on the content of the webpage. All links or buttons are enclosed in "[]". You can only click on these. Remaining text is only a description.
+
 Webshop
 Instruction:
 i would like a 3 ounce bottle of bright citrus deodorant for sensitive skin, and price lower than 50.00 dollars
