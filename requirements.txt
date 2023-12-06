@@ -6,4 +6,5 @@ diskcache
 tenacity
 registrable
 sympy
-gradio
+# Otherwise this will pull in Pydantic 2.0 which can cause issues
+gradio==3.40.1

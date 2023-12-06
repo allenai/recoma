@@ -4,7 +4,7 @@ https://packaging.python.org/guides/distributing-packages-using-setuptools/
 https://github.com/pypa/sampleproject
 """
 
-import pathlib
+from pathlib import Path
 from typing import List
 
 from setuptools import setup, find_namespace_packages
@@ -21,13 +21,9 @@ def read_reqs_file(path: str) -> List[str]:
     return reqs
 
 
-here = pathlib.Path(__file__).parent.resolve()
-
 # Get the long description from the README file
-long_description = (here / "README.md").read_text(encoding="utf-8")
-
+long_description = Path("README.md").read_text(encoding="utf-8")
 setup(
-
     name="recoma",
     version="0.0.1",
     description="A Python package to reason by communicating with agents",
@@ -50,7 +46,7 @@ setup(
         "Programming Language :: Python :: 3 :: Only",
     ],
     keywords="reasoning, communication, language models, tools, LLM",  # Optional
-    packages=find_namespace_packages(exclude=["experimental.*", "output.*", "output"]),
+    packages=find_namespace_packages(include=['recoma', 'recoma.*']),
     python_requires=">=3.9",
     install_requires=read_reqs_file("requirements.txt"),
     entry_points={  # Optional
