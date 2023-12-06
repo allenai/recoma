@@ -92,13 +92,17 @@ class BestFirstSearch(SearchAlgo):
                 if new_state.depth() <= self.max_search_depth:
                     heapq.heappush(heap, new_state)
                 else:
-                    logger.debug("!HIT MAX DEPTH!")
+                    logger.warning("!HIT MAX DEPTH!: {}".format(example.qid))
             # Rather than failing at the beginning of the loop, fail at the end here and return the
             # current state
             if len(heap) == 0:
-                return ExamplePrediction(example=example, prediction="", final_state=current_state)
+                answer = self.answerer.generate_answer(current_state)
+                logger.warning("!EMPTY HEAP!: {}".format(example.qid))
+                return ExamplePrediction(example=example, prediction=answer, final_state=current_state)
             iters += 1
-
+        logger.warning("!SEARCH FAILED!: {}".format(example.qid))
+        best_state = heapq.heappop(heap)
+        answer = self.answerer.generate_answer(best_state)
         return ExamplePrediction(example=example,
-                                 prediction="SEARCH FAILED",
-                                 final_state=heapq.heappop(heap))
+                                 prediction=answer,
+                                 final_state=best_state)

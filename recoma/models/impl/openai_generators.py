@@ -142,13 +142,7 @@ class GPT3ChatGenerator(LMGenerator):
         return function(**kwargs)
 
     def generate(self, input_str):
-        # TODO Find a better way to handle JSON inputs
-        if "\"role\": \"user\"" in input_str:
-            messages_json = json.loads(input_str)
-        else:
-            messages_json = [
-                {"role": "user", "content": input_str}
-            ]
+        messages_json = self.extract_role_messages(input_str)
         if self.use_cache and self.generator_params.temperature == 0:
             function = cached_openai_chat_call
         else:

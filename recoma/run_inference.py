@@ -98,9 +98,6 @@ def inference_mode(args, configurable_systems: ConfigurableSystems):
     print("Running inference on examples")
     example_predictions = []
 
-    if not args.input:
-        raise ValueError("Input file must be specified when run in non-demo mode")
-
     reader = configurable_systems.reader
     search_algo = configurable_systems.search
     Path(args.output_dir).mkdir(parents=True, exist_ok=True)
@@ -130,7 +127,7 @@ def dump_predictions(args, example_predictions: List[ExamplePrediction]):
         for x in example_predictions:
             try:
                 pred_json = json.loads(x.prediction)
-                if not isinstance(pred_json, list):
+                if not isinstance(pred_json, list) and not isinstance(pred_json, dict):
                     pred_json = x.prediction
             except Exception:
                 pred_json = x.prediction

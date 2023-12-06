@@ -1,6 +1,9 @@
 from abc import abstractmethod
+from ast import List
 from dataclasses import dataclass, field
-from typing import Any
+import json
+import re
+from typing import Any, Dict
 
 from recoma.utils.class_utils import RegistrableFromDict
 
@@ -41,3 +44,28 @@ class LMGenerator(RegistrableFromDict):
         string as output
         """
         raise NotImplementedError
+
+    def extract_role_messages(self, input_str):
+         # TODO Find a better way to handle JSON inputs
+        if "\"role\": \"user\"" in input_str:
+            messages_json = json.loads(input_str)
+        elif "ASSISTANT:\n" in input_str:
+            messages_json = []
+            last_start = 0
+            for m in re.finditer("(USER|ASSISTANT|SYSTEM):\n", input_str, flags=re.IGNORECASE):
+                last_end = m.span()[0]
+                if len(messages_json) == 0:
+                    if last_end != 0:
+                        raise ValueError("Start of the prompt has no assigned role: {}".format(
+                            input_str[:last_end]))
+                else:
+                    messages_json[-1]["content"] = input_str[last_start:last_end].strip()
+                mesg_type = m.group(1).lower()
+                messages_json.append({"role": mesg_type, "content": None})
+                last_start = m.span()[1]
+            messages_json[-1]["content"] = input_str[last_start:]
+        else:
+            messages_json = [
+                {"role": "user", "content": input_str}
+            ]
+        return messages_json
