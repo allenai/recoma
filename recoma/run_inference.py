@@ -13,6 +13,7 @@ from recoma.models.core.base_model import BaseModel
 from recoma.search.search import SearchAlgo, ExamplePrediction
 from recoma.utils.class_utils import import_module_and_submodules
 from recoma.utils.env_utils import get_environment_variables
+from recoma.utils.state_renderer import StateRenderer
 
 logger = logging.getLogger(__name__)
 
@@ -22,7 +23,7 @@ class ConfigurableSystems:
     source_json: str
     reader: DatasetReader
     search: SearchAlgo
-
+    renderer: StateRenderer
 
 def parse_arguments():
     arg_parser = argparse.ArgumentParser(description='Run inference')
@@ -53,16 +54,18 @@ def build_configurable_systems(config_file, output_dir):
 
     source_json = config_map
     reader: DatasetReader = DatasetReader.from_dict(config_map["reader"])
-
+    # TBD Make configurable
+    renderer = StateRenderer.from_dict({"type": "block"})
     model_map = {}
     for k, v in config_map["models"].items():
         # initialize models
         model_map[k] = BaseModel.from_dict(v)
     Path(output_dir + "/html_dump").mkdir(parents=True, exist_ok=True)
-    search = SearchAlgo.from_dict({"model_list": model_map,
+    search = SearchAlgo.from_dict({"model_list": model_map, "renderer": renderer,
                                    "output_dir": output_dir + "/html_dump/"} |
                                   config_map["search"])
-    return ConfigurableSystems(source_json=source_json, reader=reader, search=search)
+
+    return ConfigurableSystems(source_json=source_json, reader=reader, search=search, renderer=renderer)
 
 
 def demo_mode(args, configurable_systems: ConfigurableSystems):
@@ -125,10 +128,16 @@ def dump_predictions(args, example_predictions: List[ExamplePrediction]):
         prediction_dump = {}
         total_score = 0
         for x in example_predictions:
+            metadata_json = None
             try:
                 pred_json = json.loads(x.prediction)
                 if not isinstance(pred_json, list) and not isinstance(pred_json, dict):
                     pred_json = x.prediction
+                elif isinstance(pred_json, dict):
+                    if "metadata" in pred_json:
+                        metadata_json = pred_json.pop("metadata")
+                    if "answer" in pred_json:
+                        pred_json = pred_json["answer"]
             except Exception:
                 pred_json = x.prediction
             all_data_dict = x.example.__dict__
@@ -139,6 +148,8 @@ def dump_predictions(args, example_predictions: List[ExamplePrediction]):
                 gold_answer = x.example.gold_answer
             score = 1 if (x.prediction == gold_answer) else 0
             all_data_dict["correct"] = str(score)
+            if metadata_json:
+                all_data_dict["metadata"] = metadata_json
             total_score += score
             all_data_fp.write(json.dumps(all_data_dict) + "\n")
             prediction_dump[x.example.qid] = pred_json
@@ -167,16 +178,17 @@ def gradio_demo_fn(args, configurable_systems: ConfigurableSystems,
     if args.dump_prompts and predictions.final_state:
         print(predictions.final_state.all_input_output_prompts())
     return json.dumps(predictions.prediction), \
-           (predictions.final_state.to_html_tree() if predictions.final_state else "")
+           (configurable_systems.renderer.to_html(predictions.final_state)
+            if predictions.final_state else "")
 
 
 def build_gradio_interface(parsed_args, config_sys):
     gradio_fn = lambda qid, question, context: gradio_demo_fn(parsed_args, config_sys,
                                                               qid, question, context)
-    with gr.Blocks() as demo:
+    with gr.Blocks(theme="monochrome") as demo:
         qid = gr.Textbox(max_lines=1, label="QID")
         question = gr.Textbox(max_lines=1, label="Question")
-        context = gr.Textbox(line=5, max_lines=20, label="Context")
+        context = gr.Textbox(max_lines=20, label="Context")
         button = gr.Button("Solve")
 
         answer_output = gr.JSON(label="Answer:")

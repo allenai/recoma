@@ -1,3 +1,4 @@
+from curses import meta
 import heapq
 import logging
 from dataclasses import dataclass
@@ -15,10 +16,12 @@ class ExamplePrediction:
     example: Example
     prediction: str
     final_state: SearchState = None
+    metadata: dict = None
 
 
 class SearchAlgo(RegistrableFromDict):
-    def __init__(self, model_list, start_model, answerer=None, max_search_iters=100,
+    def __init__(self, model_list, start_model, renderer=None,
+                 answerer=None, max_search_iters=100,
                  max_search_depth=100, output_dir=None, **kwargs):
         super().__init__(**kwargs)
         self.model_list = model_list
@@ -28,6 +31,7 @@ class SearchAlgo(RegistrableFromDict):
         self.max_search_iters = max_search_iters
         self.max_search_depth = max_search_depth
         self.output_dir = output_dir
+        self.renderer = renderer
 
     def execute(self, current_state: SearchState):
         open_node = current_state.get_open_node()
@@ -73,9 +77,9 @@ class BestFirstSearch(SearchAlgo):
             # pop from heap
             current_state = heapq.heappop(heap)
             logger.debug("\n" + current_state.to_str_tree())
-            if self.output_dir:
+            if self.output_dir and self.renderer:
                 with open(self.output_dir + "/" + clean_name(example.qid) + ".html", "w") as fp:
-                    fp.write(current_state.to_html_tree())
+                    fp.write(self.renderer.to_html(current_state))
             if not current_state.has_open_node():
                 # found a solution
                 answer = self.answerer.generate_answer(current_state)

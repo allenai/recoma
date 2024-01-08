@@ -55,39 +55,6 @@ class SearchNode(Node):
             label += "<" + self.target + "> " + display_str + " => ... "
         return label
 
-    def to_html_node(self):
-        summary = ""
-        if self._tag:
-            summary = self._tag
-        else:
-            if self.is_open():
-                summary += "<u>&lt;" + self.target + "&gt;</u> "
-            else:
-                summary += "<span class=\"model_name\">" + self.target + "</span>"
-            if self.input_str_for_display:
-                summary += self.input_str_for_display + " => "
-            if self.output is not None:
-                summary += self.output.replace("\n", "\n<br>")
-            else:
-                summary += " ... "
-        details = ""
-        if "prompts" in self.data:
-            for input_str, output_strs in self.data["prompts"]:
-                details += "<b>Input:</b>\n<br>\n" + input_str.replace("\n", "<br>") + "\n<br>\n"
-                for output_str in output_strs:
-                    details += "&nbsp;<b>Output:</b>\n<br>\n" + output_str.replace("\n",
-                                                                                   "<br>") + "\n<br>\n"
-                details += "\n<hr>\n"
-        if details == "":
-            return summary + "<br/>"
-        else:
-            return """{}
-                      <details style="margin-left: 5em;font-size: 75%;">
-                         <summary>Prompts</summary>
-                         {}
-                      </details>
-            """.format(summary, details)
-
     def add_input_output_prompt(self, input_str: str, output: GenerationOutputs):
         if self.data is None:
             self.data = {}
@@ -144,58 +111,6 @@ class SearchState(Tree):
 
     def to_str_tree(self) -> str:
         return self.show(stdout=False, sorting=False) or ""
-
-    def to_json_tree(self) -> str:
-        return self.to_json(sort=False)
-
-    def to_html_tree(self, parent=None) -> str:
-        header = ""
-        footer = ""
-        if parent is None:
-            parent = self.get_node(self.root)
-            if parent is None:
-                raise ValueError("No root for tree!")
-            header = """<style type="text/css">
-                          details > *:not(summary){
-                          margin-left: 2em;
-                         }
-                        .model_name {
-                          display: inline-block;
-                          padding: 1px 2px;
-                          margin-right: 3px;
-                          border-radius: 2px;
-                          background-color: #85C1E9;
-                          color: #000000;
-                          border-color: #000000;
-                          border: solid;
-                          border-radius: 3px;
-                          border-width: 1px;
-                          text-decoration: none;
-                          font-weight: bold;
-                          text-align: center;
-                          cursor: pointer;
-                        }
-
-                        .model_name:hover {
-                          background-color: #cccccc;
-                        }
-                        </style>  
-            """
-            footer = ""
-        children_repr = ""
-        for child in self.get_children(parent):
-            children_repr += self.to_html_tree(child) + "\n"
-
-        if children_repr:
-            tree_repr = """<p style=\"margin:1px;\"><details>
-                          <summary>{}</summary>
-                          {}
-                       </details></p>
-                   """.format(parent.to_html_node(),
-                              children_repr)
-        else:
-            tree_repr = "<p style=\"margin:1px; margin-left: 3em;\">{}</p>".format(parent.to_html_node())
-        return header + tree_repr + footer
 
     def all_input_output_prompts(self) -> str:
         output_str = ""

@@ -37,6 +37,7 @@ class MathProgramExecuter(BaseModel):
             raise ValueError("Model called without any open node!!")
         input_prog = curr_node.input_str
         output = self.eval_program(input_prog)
+        curr_node.input_str = "```\n" + curr_node.input_str + "\n```"
         return GenerationOutputs(outputs=[output])
 
     def eval_program(self, input_prog):
