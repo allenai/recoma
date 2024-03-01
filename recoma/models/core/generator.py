@@ -1,10 +1,11 @@
+import json
+import re
 from abc import abstractmethod
 from ast import List
 from dataclasses import dataclass, field
-import json
-import re
-from typing import Any, Dict
+from typing import Any, Dict, Optional
 
+from recoma.search.state import SearchState
 from recoma.utils.class_utils import RegistrableFromDict
 
 
@@ -20,6 +21,7 @@ class GeneratorParams:
     num_sequences: int = 1
     best_of: int = 1
     topk_logprobs: int = 0
+    seed: Optional[int] = None
 
 
 @dataclass
@@ -38,10 +40,10 @@ class LMGenerator(RegistrableFromDict):
         self.generator_params = GeneratorParams(**kwargs)
 
     @abstractmethod
-    def generate(self, input_str: str) -> GenerationOutputs:
+    def generate(self, input_str: str, current_state: SearchState) -> GenerationOutputs:
         """
-        All implementations must implement this generate function that takes input text and returns
-        string as output
+        All implementations must implement this generate function that takes input text and current
+        search state. Returns GenerationOutputs as output.
         """
         raise NotImplementedError
 

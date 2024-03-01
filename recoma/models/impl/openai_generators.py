@@ -12,6 +12,7 @@ from tenacity import (
     before_sleep_log
 )  # for exponential backoff
 
+from recoma.search.state import SearchState
 from recoma.models.core.generator import LMGenerator, GenerationOutputs
 
 logger = logging.getLogger(__name__)
@@ -52,7 +53,8 @@ def generator_params_to_args(generator_params, is_chat_model=False):
         "frequency_penalty": generator_params.frequency_penalty,
         "presence_penalty": generator_params.presence_penalty,
         "stop": generator_params.stop,
-        "best_of": generator_params.best_of
+        "best_of": generator_params.best_of,
+        "seed": generator_params.seed
     }
 
     return kwargs
@@ -71,7 +73,7 @@ class GPT3CompletionGenerator(LMGenerator):
     def completion_with_backoff(self, function, **kwargs) -> dict[Any, Any]:
         return function(**kwargs)
 
-    def generate(self, input_str):
+    def generate(self, input_str, state):
         # GPT3 can't handle trailing white-space
         prompt = input_str.rstrip()
         if self.use_cache and self.generator_params.temperature == 0:
@@ -86,6 +88,9 @@ class GPT3CompletionGenerator(LMGenerator):
             function=function, **generator_args)
         # print(response)
         generation_outputs = GenerationOutputs(outputs=[], scores=[])
+        state.update_counter("openai.{}.calls".format(self.model), 1)
+        for usage_key, count in response["usage"].items():
+            state.update_counter("openai.{}.{}".format(self.model, usage_key), count)
 
         for index, choice in enumerate(response["choices"]):
             if "logprobs" in choice and choice["logprobs"] is not None and "token_logprobs" in choice["logprobs"]:
@@ -116,7 +121,7 @@ class GPT3CompletionGenerator(LMGenerator):
 @cache.memoize()
 def cached_openai_chat_call(  # kwargs doesn't work with caching
         model, messages, temperature, max_tokens, top_p,
-        frequency_penalty, presence_penalty, stop, n
+        frequency_penalty, presence_penalty, stop, n, seed
 ):
     return openai.ChatCompletion.create(model=model, messages=messages,
                                         temperature=temperature,
@@ -124,6 +129,7 @@ def cached_openai_chat_call(  # kwargs doesn't work with caching
                                         top_p=top_p,
                                         n=n,
                                         stop=stop,
+                                        seed=seed,
                                         frequency_penalty=frequency_penalty,
                                         presence_penalty=presence_penalty)
 
@@ -141,7 +147,7 @@ class GPT3ChatGenerator(LMGenerator):
     def completion_with_backoff(self, function, **kwargs) -> dict[Any, Any]:
         return function(**kwargs)
 
-    def generate(self, input_str):
+    def generate(self, input_str, state: SearchState):
         messages_json = self.extract_role_messages(input_str)
         if self.use_cache and self.generator_params.temperature == 0:
             function = cached_openai_chat_call
@@ -159,7 +165,11 @@ class GPT3ChatGenerator(LMGenerator):
             function=function, **generator_args)
 
         generation_outputs = GenerationOutputs(outputs=[], scores=[])
+        state.update_counter("openai.{}.calls".format(self.model), 1)
+        for usage_key, count in response["usage"].items():
+            state.update_counter("openai.{}.{}".format(self.model, usage_key), count)
 
+        state.update_counter("{}.calls".format(self.model), 1)
         for index, choice in enumerate(response["choices"]):
             text_response = choice["message"]["content"].lstrip()
             # no scores in chat mode

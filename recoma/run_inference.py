@@ -128,7 +128,7 @@ def dump_predictions(args, example_predictions: List[ExamplePrediction]):
         prediction_dump = {}
         total_score = 0
         for x in example_predictions:
-            metadata_json = None
+            metadata_json = {}
             try:
                 pred_json = json.loads(x.prediction)
                 if not isinstance(pred_json, list) and not isinstance(pred_json, dict):
@@ -142,6 +142,8 @@ def dump_predictions(args, example_predictions: List[ExamplePrediction]):
                 pred_json = x.prediction
             all_data_dict = x.example.__dict__
             all_data_dict["predicted"] = pred_json
+            if x.final_state and x.final_state.data:
+                metadata_json = x.final_state.data | metadata_json
             if isinstance(x.example.gold_answer, list) and len(x.example.gold_answer) == 1:
                 gold_answer = x.example.gold_answer[0]
             else:

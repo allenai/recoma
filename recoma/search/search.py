@@ -16,7 +16,6 @@ class ExamplePrediction:
     example: Example
     prediction: str
     final_state: SearchState = None
-    metadata: dict = None
 
 
 class SearchAlgo(RegistrableFromDict):

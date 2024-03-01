@@ -61,7 +61,7 @@ class PromptedLMModel(BaseModel):
         if open_node is None:
             raise ValueError("Model called without any open node!!")
         lm_input = self.build_lm_input(self.prompt, open_node.input_str, state)
-        output = self.generator.generate(lm_input)
+        output = self.generator.generate(lm_input, state)
         logger.debug("Input: ..." + lm_input[-200:])
         logger.debug("Output: " + output.outputs[0])
         open_node.add_input_output_prompt(lm_input, output)

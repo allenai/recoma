@@ -4,7 +4,6 @@ from typing import Optional, Any, List
 from treelib import Tree, Node
 
 from recoma.datasets.reader import Example
-from recoma.models.core.generator import GenerationOutputs
 
 
 class SearchNode(Node):
@@ -55,7 +54,7 @@ class SearchNode(Node):
             label += "<" + self.target + "> " + display_str + " => ... "
         return label
 
-    def add_input_output_prompt(self, input_str: str, output: GenerationOutputs):
+    def add_input_output_prompt(self, input_str, output):
         if self.data is None:
             self.data = {}
         if "prompts" not in self.data:
@@ -78,16 +77,23 @@ class SearchNode(Node):
 
 class SearchState(Tree):
 
-    def __init__(self, example: Example = None, score=0,
+    def __init__(self, example: Example = None, score=0, data = {},
                  **kwargs):
         super().__init__(node_class=SearchNode, **kwargs)
         self.example = example
         self.score = score
+        self.data = data
 
     def clone(self, identifier=None, with_tree=True, deep=True):
         # Reset the open node as the cloning might reset the identifiers
-        return SearchState(example=self.example, score=self.score,
+        return SearchState(example=self.example, score=self.score, data=self.data,
                            identifier=identifier, deep=deep, tree=self if with_tree else None)
+
+
+    def update_counter(self, counter_key: str, count: int):
+        if counter_key not in self.data:
+            self.data[counter_key] = 0
+        self.data[counter_key] += count
 
     def get_open_node(self) -> Optional[SearchNode]:
         # TODO Cache the depth first open node value. This is tricky because any non-local change
