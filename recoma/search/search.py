@@ -59,7 +59,7 @@ def clean_name(qid):
 class BestFirstSearch(SearchAlgo):
 
     def predict(self, example):
-        init_state = SearchState(example=example)
+        init_state = SearchState(example=example, data={})
         # add root node
         init_state.add_next_step(next_step_input=example.question,
                                  next_step_input_for_display=example.question,

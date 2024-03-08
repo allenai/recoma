@@ -1,3 +1,4 @@
+from copy import deepcopy
 from multiprocessing import Value
 from typing import Optional, Any, List
 
@@ -86,7 +87,7 @@ class SearchState(Tree):
 
     def clone(self, identifier=None, with_tree=True, deep=True):
         # Reset the open node as the cloning might reset the identifiers
-        return SearchState(example=self.example, score=self.score, data=self.data,
+        return SearchState(example=self.example, score=self.score, data=deepcopy(self.data),
                            identifier=identifier, deep=deep, tree=self if with_tree else None)
 
 
