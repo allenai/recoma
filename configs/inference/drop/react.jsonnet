@@ -1,10 +1,10 @@
-local generator_params = import "../common/default_gpt_davinci002.libsonnet";
+local generator_params = import "../common/default_gpt_gpt3.5.libsonnet";
 {
     "models": {
         "drop_react": {
-            "type": "react_controller",
-            "react_model": "react_lm",
-            "action_model": "qa"
+            "type": "simple_react",
+            "action_model": "react_lm",
+            "observation_model": "qa"
         },
         "react_lm": {
             "type": "prompted_lm",
@@ -36,4 +36,3 @@ local generator_params = import "../common/default_gpt_davinci002.libsonnet";
       "type": "drop"
     }
 }
-

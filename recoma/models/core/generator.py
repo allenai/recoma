@@ -20,7 +20,8 @@ class GeneratorParams:
     stop: list[str] = field(default_factory=lambda: ["\n"])
     num_sequences: int = 1
     best_of: int = 1
-    topk_logprobs: int = 0
+    logprobs: bool = False
+    top_logprobs: Optional[int] = None
     seed: Optional[int] = None
 
 
@@ -36,6 +37,7 @@ class LMGenerator(RegistrableFromDict):
     Base LM Generator class. All text-to-text generators should inherit this base registrable class
     and implement the generate method
     """
+
     def __init__(self, **kwargs):
         self.generator_params = GeneratorParams(**kwargs)
 
@@ -48,7 +50,7 @@ class LMGenerator(RegistrableFromDict):
         raise NotImplementedError
 
     def extract_role_messages(self, input_str):
-         # TODO Find a better way to handle JSON inputs
+        # TODO Find a better way to handle JSON inputs
         if "\"role\": \"user\"" in input_str:
             messages_json = json.loads(input_str)
         elif "ASSISTANT:\n" in input_str:
@@ -71,3 +73,20 @@ class LMGenerator(RegistrableFromDict):
                 {"role": "user", "content": input_str}
             ]
         return messages_json
+
+    @staticmethod
+    def generator_params_to_args(generator_params: GeneratorParams):
+        kwargs = {
+            "temperature": generator_params.temperature,
+            "max_tokens": generator_params.max_tokens,
+            "top_p": generator_params.top_p,
+            "n": generator_params.num_sequences,
+            "logprobs": generator_params.logprobs,
+            "top_logprobs": generator_params.top_logprobs,
+            "frequency_penalty": generator_params.frequency_penalty,
+            "presence_penalty": generator_params.presence_penalty,
+            "stop": generator_params.stop,
+            "best_of": generator_params.best_of,
+            "seed": generator_params.seed
+        }
+        return kwargs
