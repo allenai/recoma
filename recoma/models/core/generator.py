@@ -63,7 +63,7 @@ class LMGenerator(RegistrableFromDict):
                         raise ValueError("Start of the prompt has no assigned role: {}".format(
                             input_str[:last_end]))
                 else:
-                    messages_json[-1]["content"] = input_str[last_start:last_end].strip()
+                    messages_json[-1]["content"] = input_str[last_start:last_end]
                 mesg_type = m.group(1).lower()
                 messages_json.append({"role": mesg_type, "content": None})
                 last_start = m.span()[1]

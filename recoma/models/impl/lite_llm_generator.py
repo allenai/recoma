@@ -1,10 +1,10 @@
 import logging
 import os
 from typing import Any
-
+import json
 import litellm
 from diskcache import Cache
-from litellm import completion
+from litellm import completion, completion_cost
 from tenacity import (before_sleep_log, retry,  # for exponential backoff
                       stop_after_attempt, wait_random_exponential)
 
@@ -17,21 +17,31 @@ litellm.drop_params = True
 cache = Cache(os.path.expanduser("~/.cache/litellmcalls"))
 
 
-@cache.memoize(ignore=("client"))
+@cache.memoize()
 def cached_litellm_call(
-        model, messages, temperature, max_tokens, top_p,
+        model, messages, temperature, max_tokens, top_p, logprobs, top_logprobs, best_of,
         frequency_penalty, presence_penalty, stop, n, seed
 ):
-    return completion(model=model, messages=messages, temperature=temperature,
-                      max_tokens=max_tokens, top_p=top_p, n=n, stop=stop, seed=seed,
-                      frequency_penalty=frequency_penalty, presence_penalty=presence_penalty)
+    return completion(model=model, messages=messages,
+                      temperature=temperature,
+                      max_tokens=max_tokens,
+                      best_of=best_of,
+                      top_p=top_p,
+                      logprobs=logprobs,
+                      top_logprobs=top_logprobs,
+                      n=n,
+                      stop=stop,
+                      seed=seed,
+                      frequency_penalty=frequency_penalty,
+                      presence_penalty=presence_penalty)
 
 
 @LMGenerator.register("lite_llm")
 class LiteLLMGenerator(LMGenerator):
 
-    def __init__(self, model: str, **kwargs):
+    def __init__(self, model: str, use_cache: bool=False, **kwargs):
         super().__init__(**kwargs)
+        self.use_cache = use_cache
         self.model = model
 
     @retry(wait=wait_random_exponential(min=1, max=60), stop=stop_after_attempt(10),
@@ -41,6 +51,8 @@ class LiteLLMGenerator(LMGenerator):
 
     def generate(self, input_str, state):
         messages_json = self.extract_role_messages(input_str)
+        formatted_messages = json.dumps(messages_json, indent=2)
+        logger.debug("Messages:\n{}\n...\n{}".format(formatted_messages[:200], formatted_messages[-200:]))
         generator_args = self.generator_params_to_args(self.generator_params)
         generator_args["messages"] = messages_json
         generator_args["model"] = self.model
@@ -53,16 +65,35 @@ class LiteLLMGenerator(LMGenerator):
         response: dict[Any, Any] = self.completion_with_backoff(
             function=function, **generator_args)
 
-        generation_outputs = GenerationOutputs(outputs=[], scores=[])
+        try:
+            cost = completion_cost(response)
+            state.update_counter("litellm.{}.cost".format(self.model), cost)
+        except:
+            # Unknown model
+            pass
+
         state.update_counter("litellm.{}.calls".format(self.model), 1)
         for usage_key, count in response["usage"].__dict__.items():
             state.update_counter("litellm.{}.{}".format(
                 self.model, usage_key), count)
-
         state.update_counter("{}.calls".format(self.model), 1)
+
+        generation_outputs = GenerationOutputs(outputs=[], scores=[])
         for index, choice in enumerate(response["choices"]):
-            text_response = choice["message"]["content"].lstrip()
-            # no scores in chat mode
-            generation_outputs.outputs.append(text_response)
+            text_response = choice["message"]["content"]
+            # print(formatted_messages)
+            # print(text_response)
+            # _ = input("Wait")
+            # For some reason, the stop token does not always work!
+            for stop_t in self.generator_params.stop:
+                if stop_t in text_response:
+                    stop_idx = text_response.index(stop_t)
+                    text_response = text_response[:stop_idx]
+
+            generation_outputs.outputs.append(text_response.lstrip())
+        # JSON Formatted message, add to node
+        if len(messages_json) > 1:
+            open_node = state.get_open_node()
+            open_node.add_input_output_prompt(formatted_messages, generation_outputs)
 
         return generation_outputs

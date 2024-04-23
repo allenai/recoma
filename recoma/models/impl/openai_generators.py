@@ -5,7 +5,7 @@ import os
 from calendar import c
 from http import client
 from typing import Any
-
+from litellm import completion_cost
 import openai
 from diskcache import Cache
 from tenacity import (before_sleep_log, retry,  # for exponential backoff
@@ -54,6 +54,7 @@ class OpenAIChatGenerator(LMGenerator):
 
     def generate(self, input_str, state: SearchState):
         messages_json = self.extract_role_messages(input_str)
+        logger.debug("Messages:\n{}".format(json.dumps(messages_json, indent=2)[:100]))
         generator_args = self.generator_params_to_args(self.generator_params)
         generator_args["messages"] = messages_json
         generator_args["model"] = self.model
@@ -68,7 +69,12 @@ class OpenAIChatGenerator(LMGenerator):
 
         response: dict[Any, Any] = self.completion_with_backoff(
             function=function, **generator_args)
-
+        try:
+            cost = completion_cost(response)
+            state.update_counter("openai.{}.cost".format(self.model), cost)
+        except:
+            # Unknown model
+            pass
         generation_outputs = GenerationOutputs(outputs=[], scores=[])
         state.update_counter("openai.{}.calls".format(self.model), 1)
         for usage_key, count in response.usage.__dict__.items():

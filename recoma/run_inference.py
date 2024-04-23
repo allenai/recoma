@@ -23,7 +23,7 @@ class ConfigurableSystems:
     source_json: str
     reader: DatasetReader
     search: SearchAlgo
-    renderer: StateRenderer
+    renderers: List[StateRenderer]
 
 def parse_arguments():
     arg_parser = argparse.ArgumentParser(description='Run inference')
@@ -54,18 +54,22 @@ def build_configurable_systems(config_file, output_dir):
 
     source_json = config_map
     reader: DatasetReader = DatasetReader.from_dict(config_map["reader"])
-    # TBD Make configurable
-    renderer = StateRenderer.from_dict({"type": "block"})
+    if "renderers" in config_map:
+        renderers = [StateRenderer.from_dict(x)
+                     for x in config_map["renderers"]]
+    else:
+        renderers = [StateRenderer.from_dict({"type": "block"}),
+                     StateRenderer.from_dict({"type": "simple_json"})]
     model_map = {}
     for k, v in config_map["models"].items():
         # initialize models
         model_map[k] = BaseModel.from_dict(v)
-    Path(output_dir + "/html_dump").mkdir(parents=True, exist_ok=True)
-    search = SearchAlgo.from_dict({"model_list": model_map, "renderer": renderer,
-                                   "output_dir": output_dir + "/html_dump/"} |
+    Path(output_dir + "/files").mkdir(parents=True, exist_ok=True)
+    search = SearchAlgo.from_dict({"model_list": model_map, "renderers": renderers,
+                                   "output_dir": output_dir + "/files/"} |
                                   config_map["search"])
 
-    return ConfigurableSystems(source_json=source_json, reader=reader, search=search, renderer=renderer)
+    return ConfigurableSystems(source_json=source_json, reader=reader, search=search, renderers=renderers)
 
 
 def demo_mode(args, configurable_systems: ConfigurableSystems):

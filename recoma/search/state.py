@@ -91,7 +91,7 @@ class SearchState(Tree):
                            identifier=identifier, deep=deep, tree=self if with_tree else None)
 
 
-    def update_counter(self, counter_key: str, count: int):
+    def update_counter(self, counter_key: str, count: float):
         if counter_key not in self.data:
             self.data[counter_key] = 0
         self.data[counter_key] += count

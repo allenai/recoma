@@ -7,8 +7,20 @@ from recoma.utils.class_utils import RegistrableFromDict
 
 class StateRenderer(RegistrableFromDict):
 
+    def __init__(self, output_format="html", special_suffix="") -> None:
+        self.output_format = output_format
+        self.special_suffix = special_suffix
+
+    def output(self, search_state: SearchState):
+        if self.output_format == "html":
+            return self.to_html(search_state=search_state)
+        elif self.output_format == "json":
+            return self.to_json(search_state=search_state)
+        else:
+            raise ValueError("Output format: {} not supported".format(self.output_format))
+
     def to_json(self, search_state: SearchState):
-        return search_state.to_json(sort=False)
+        raise NotImplementedError
 
     def to_html(self, search_state: SearchState, relative_node = None):
         raise NotImplementedError
@@ -19,7 +31,8 @@ class StateRenderer(RegistrableFromDict):
 @StateRenderer.register("block")
 class BlockRenderer(StateRenderer):
 
-    def __init__(self) -> None:
+    def __init__(self, **kwargs) -> None:
+        super().__init__(**kwargs)
         self.style_header = """<style type="text/css">
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap');
 
@@ -202,7 +215,8 @@ details.small summary:before {
 @StateRenderer.register("tree")
 class TreeRenderer(StateRenderer):
 
-    def __init__(self) -> None:
+    def __init__(self, **kwargs) -> None:
+        super().__init__(**kwargs)
         self.style_header = """<style type="text/css">
 .tree{
   --spacing : 1rem;
@@ -299,7 +313,8 @@ class TreeRenderer(StateRenderer):
 @StateRenderer.register("old")
 class OldStateRenderer(StateRenderer):
 
-    def __init__(self) -> None:
+    def __init__(self, **kwargs) -> None:
+        super().__init__(**kwargs)
         self.style_header = """<style type="text/css">
                           details > *:not(summary){
                           margin-left: 2em;
@@ -375,3 +390,36 @@ class OldStateRenderer(StateRenderer):
                          {}
                       </details>
             """.format(summary, details)
+
+
+@StateRenderer.register("full_json")
+class FullJsonRenderer(StateRenderer):
+
+    def __init__(self, **kwargs) -> None:
+        super().__init__(**kwargs)
+        self.output_format = "json"
+        self.special_suffix = "_full"
+
+    def to_json(self, search_state: SearchState):
+        return search_state.to_json()
+
+
+@StateRenderer.register("simple_json")
+class SimpleJsonRenderer(StateRenderer):
+
+    def __init__(self, **kwargs) -> None:
+        super().__init__(**kwargs)
+        self.output_format = "json"
+
+    def to_json(self, search_state: SearchState):
+        output_json = []
+        for node_id in search_state.postorder_traversal():
+            if node_id is not None and not search_state.children(node_id):
+                node = search_state.get_node(node_id)
+                if node is not None:
+                    output_json.append({
+                        "input": node.input_str,
+                        "output": node.output,
+                        "model": node.target
+                        })
+        return json.dumps(output_json, indent=4)

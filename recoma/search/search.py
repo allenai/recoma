@@ -19,7 +19,7 @@ class ExamplePrediction:
 
 
 class SearchAlgo(RegistrableFromDict):
-    def __init__(self, model_list, start_model, renderer=None,
+    def __init__(self, model_list, start_model, renderers=None,
                  answerer=None, max_search_iters=100,
                  max_search_depth=100, output_dir=None, **kwargs):
         super().__init__(**kwargs)
@@ -30,7 +30,7 @@ class SearchAlgo(RegistrableFromDict):
         self.max_search_iters = max_search_iters
         self.max_search_depth = max_search_depth
         self.output_dir = output_dir
-        self.renderer = renderer
+        self.renderers = renderers
 
     def execute(self, current_state: SearchState):
         open_node = current_state.get_open_node()
@@ -76,9 +76,12 @@ class BestFirstSearch(SearchAlgo):
             # pop from heap
             current_state = heapq.heappop(heap)
             logger.debug("\n" + current_state.to_str_tree())
-            if self.output_dir and self.renderer:
-                with open(self.output_dir + "/" + clean_name(example.qid) + ".html", "w") as fp:
-                    fp.write(self.renderer.to_html(current_state))
+            if self.output_dir and self.renderers:
+                for renderer in self.renderers:
+                    filename = self.output_dir + "/" + clean_name(example.qid) + \
+                        renderer.special_suffix + "." +  renderer.output_format
+                    with open(filename, "w") as fp:
+                        fp.write(renderer.output(current_state))
             if not current_state.has_open_node():
                 # found a solution
                 answer = self.answerer.generate_answer(current_state)
