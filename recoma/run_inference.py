@@ -183,8 +183,14 @@ def gradio_demo_fn(args, configurable_systems: ConfigurableSystems,
     predictions = search_algo.predict(example=example)
     if args.dump_prompts and predictions.final_state:
         print(predictions.final_state.all_input_output_prompts())
+    html_renderer = None
+    for renderer in configurable_systems.renderers:
+        if renderer.output_format == "html":
+            html_renderer = renderer
+    if html_renderer is None:
+        raise ValueError("HTML renderer not found in renderers")
     return json.dumps(predictions.prediction), \
-           (configurable_systems.renderer.to_html(predictions.final_state)
+           (html_renderer.output(predictions.final_state)
             if predictions.final_state else "")
 
 

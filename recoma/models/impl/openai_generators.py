@@ -67,8 +67,7 @@ class OpenAIChatGenerator(LMGenerator):
         else:
             function = self.client.chat.completions.create
 
-        response: dict[Any, Any] = self.completion_with_backoff(
-            function=function, **generator_args)
+        response = self.completion_with_backoff(function=function, **generator_args)
         try:
             cost = completion_cost(response)
             state.update_counter("openai.{}.cost".format(self.model), cost)
