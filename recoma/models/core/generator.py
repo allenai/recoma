@@ -23,6 +23,7 @@ class GeneratorParams:
     logprobs: bool = False
     top_logprobs: Optional[int] = None
     seed: Optional[int] = None
+    json_format: bool = False
 
 
 @dataclass
@@ -89,4 +90,8 @@ class LMGenerator(RegistrableFromDict):
             "best_of": generator_params.best_of,
             "seed": generator_params.seed
         }
+        if generator_params.json_format:
+            kwargs["response_format"] = { "type": "json_object" }
+        else:
+            kwargs["response_format"] = { "type": "text" }
         return kwargs

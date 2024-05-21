@@ -23,7 +23,7 @@ cache = Cache(os.path.expanduser("~/.cache/gpt3calls"))
 @cache.memoize(ignore=("client"))
 def cached_openai_chat_call(
         client, model, messages, temperature, max_tokens, top_p, logprobs, top_logprobs,
-        frequency_penalty, presence_penalty, stop, n, seed
+        frequency_penalty, presence_penalty, stop, n, seed, response_format
 ):
     return client.chat.completions.create(model=model, messages=messages,
                                           temperature=temperature,
@@ -35,7 +35,8 @@ def cached_openai_chat_call(
                                           stop=stop,
                                           seed=seed,
                                           frequency_penalty=frequency_penalty,
-                                          presence_penalty=presence_penalty)
+                                          presence_penalty=presence_penalty,
+                                          response_format=response_format)
 
 
 @LMGenerator.register("openai_chat")
@@ -83,7 +84,7 @@ class OpenAIChatGenerator(LMGenerator):
 
         state.update_counter("{}.calls".format(self.model), 1)
         for index, choice in enumerate(response.choices):
-            text_response = choice.message.content.lstrip()
+            text_response = choice.message.content.lstrip() if choice.message.content else ""
             # no scores in chat mode
             generation_outputs.outputs.append(text_response)
 

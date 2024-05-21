@@ -20,7 +20,7 @@ cache = Cache(os.path.expanduser("~/.cache/litellmcalls"))
 @cache.memoize()
 def cached_litellm_call(
         model, messages, temperature, max_tokens, top_p, logprobs, top_logprobs, best_of,
-        frequency_penalty, presence_penalty, stop, n, seed
+        frequency_penalty, presence_penalty, stop, n, seed, response_format
 ):
     return completion(model=model, messages=messages,
                       temperature=temperature,
@@ -33,7 +33,8 @@ def cached_litellm_call(
                       stop=stop,
                       seed=seed,
                       frequency_penalty=frequency_penalty,
-                      presence_penalty=presence_penalty)
+                      presence_penalty=presence_penalty,
+                      response_format=response_format)
 
 
 @LMGenerator.register("lite_llm")
