@@ -7,6 +7,7 @@ from http import client
 from typing import Any
 from litellm import completion_cost
 import openai
+from openai.types.chat.chat_completion import ChatCompletion
 from diskcache import Cache
 from tenacity import (before_sleep_log, retry,  # for exponential backoff
                       stop_after_attempt, wait_random_exponential)
@@ -49,7 +50,7 @@ class OpenAIChatGenerator(LMGenerator):
 
     @retry(wait=wait_random_exponential(min=1, max=60), stop=stop_after_attempt(10),
            before_sleep=before_sleep_log(logger, logging.DEBUG))
-    def completion_with_backoff(self, function, **kwargs) -> dict[Any, Any]:
+    def completion_with_backoff(self, function, **kwargs) -> ChatCompletion:
         return function(**kwargs)
 
     def generate(self, input_str, state: SearchState):
@@ -67,7 +68,7 @@ class OpenAIChatGenerator(LMGenerator):
         else:
             function = self.client.chat.completions.create
 
-        response = self.completion_with_backoff(function=function, **generator_args)
+        response: ChatCompletion = self.completion_with_backoff(function=function, **generator_args)
         try:
             cost = completion_cost(response)
             state.update_counter("openai.{}.cost".format(self.model), cost)

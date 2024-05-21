@@ -8,7 +8,7 @@ from typing import List
 import _jsonnet
 import gradio as gr
 
-from recoma.datasets.reader import Example, DatasetReader
+from recoma.datasets.reader import Example, DatasetReader, QAExample
 from recoma.models.core.base_model import BaseModel
 from recoma.search.search import SearchAlgo, ExamplePrediction
 from recoma.utils.class_utils import import_module_and_submodules
@@ -79,7 +79,7 @@ def demo_mode(args, configurable_systems: ConfigurableSystems):
     Path(args.output_dir).mkdir(parents=True, exist_ok=True)
     if args.input:
         for eg in reader.read_examples(args.input):
-            qid_example_map[eg.qid] = eg
+            qid_example_map[eg.unique_id] = eg
     while True:
         qid = input("QID: ")
         if qid in qid_example_map:
@@ -92,11 +92,11 @@ def demo_mode(args, configurable_systems: ConfigurableSystems):
                 paras = [context]
             else:
                 paras = []
-            example = Example(qid=qid, question=question, gold_answer=None, paras=paras)
+            example = QAExample(qid=qid, question=question, gold_answer=None, paras=paras)
         predictions = search_algo.predict(example=example)
         if args.dump_prompts:
             print(predictions.final_state.all_input_output_prompts())
-        print(predictions.example.question)
+        print(predictions.example.task)
         print(predictions.prediction)
         print(predictions.final_state.to_str_tree())
 
@@ -116,7 +116,6 @@ def inference_mode(args, configurable_systems: ConfigurableSystems):
 
 
 def dump_predictions(args, example_predictions: List[ExamplePrediction]):
-    # Path(args.output_dir + "/tree_dump").mkdir(parents=True, exist_ok=True)
     if args.dump_prompts:
         Path(args.output_dir + "/prompts_dump").mkdir(parents=True, exist_ok=True)
     # Dump trees and I/O Prompts
@@ -148,38 +147,43 @@ def dump_predictions(args, example_predictions: List[ExamplePrediction]):
             all_data_dict["predicted"] = pred_json
             if x.final_state and x.final_state.data:
                 metadata_json = x.final_state.data | metadata_json
-            if isinstance(x.example.gold_answer, list) and len(x.example.gold_answer) == 1:
-                gold_answer = x.example.gold_answer[0]
+            if isinstance(x.example.label, list) and len(x.example.label) == 1:
+                gold_answer = x.example.label[0]
             else:
-                gold_answer = x.example.gold_answer
+                gold_answer = x.example.label
             score = 1 if (x.prediction == gold_answer) else 0
             all_data_dict["correct"] = str(score)
             if metadata_json:
                 all_data_dict["metadata"] = metadata_json
             total_score += score
             all_data_fp.write(json.dumps(all_data_dict) + "\n")
-            prediction_dump[x.example.qid] = pred_json
+            prediction_dump[x.example.unique_id] = pred_json
         print("EM Score: {} ({}/{})".format(100 * total_score / len(example_predictions),
                                             total_score, len(example_predictions)))
         json.dump(prediction_dump, output_fp)
 
 
 def gradio_demo_fn(args, configurable_systems: ConfigurableSystems,
-                   qid: str, question: str, context: str):
+                   field_values):
     qid_example_map = {}
     search_algo = configurable_systems.search
     reader = configurable_systems.reader
     Path(args.output_dir).mkdir(parents=True, exist_ok=True)
     if args.input:
         for eg in reader.read_examples(args.input):
-            qid_example_map[eg.qid] = eg
-
-    if qid in qid_example_map:
-        example = qid_example_map[qid]
+            qid_example_map[eg.unique_id] = eg
+    kwargs = {}
+    idx = 0
+    for idx, k in enumerate(QAExample.fields()):
+        if k == "paras":
+            kwargs[k] = [field_values[idx]]
+        else:
+            kwargs[k] = field_values[idx]
+    example = QAExample(**kwargs)
+    if example.unique_id in qid_example_map:
+        example = qid_example_map[example.unique_id]
         print("Using example from input file: " + str(example))
-    else:
-        paras = [context] if context else []
-        example = Example(qid=qid, question=question, gold_answer=None, paras=paras)
+
     predictions = search_algo.predict(example=example)
     if args.dump_prompts and predictions.final_state:
         print(predictions.final_state.all_input_output_prompts())
@@ -195,19 +199,23 @@ def gradio_demo_fn(args, configurable_systems: ConfigurableSystems,
 
 
 def build_gradio_interface(parsed_args, config_sys):
-    gradio_fn = lambda qid, question, context: gradio_demo_fn(parsed_args, config_sys,
-                                                              qid, question, context)
+
+    gradio_fn = lambda *field_values: gradio_demo_fn(parsed_args, config_sys, field_values)
+
     with gr.Blocks(theme="monochrome") as demo:
-        qid = gr.Textbox(max_lines=1, label="QID")
-        question = gr.Textbox(max_lines=1, label="Question")
-        context = gr.Textbox(max_lines=20, label="Context")
+        field_values = []
+        for field in QAExample.fields():
+            field_values.append(gr.Textbox(max_lines=1, label=field))
+        # qid = gr.Textbox(max_lines=1, label="QID")
+        # question = gr.Textbox(max_lines=1, label="Question")
+        # context = gr.Textbox(max_lines=20, label="Context")
         button = gr.Button("Solve")
 
         answer_output = gr.JSON(label="Answer:")
         with gr.Accordion("More details!", open=False):
             html_output = gr.HTML(label="Inference Tree")
 
-        button.click(gradio_fn, inputs=[qid, question, context],
+        button.click(gradio_fn, inputs=field_values,
                      outputs=[answer_output, html_output])
 
     return demo

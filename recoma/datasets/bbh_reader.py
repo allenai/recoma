@@ -1,6 +1,6 @@
 import json
 
-from recoma.datasets.reader import DatasetReader, Example
+from recoma.datasets.reader import DatasetReader, QAExample
 
 
 @DatasetReader.register("bbh")
@@ -27,4 +27,4 @@ class BBHReader(DatasetReader):
             question = example["input"]
             qid += 1
             answer = example["target"]
-            yield Example(qid=str(qid), question=question, gold_answer=answer, paras=[])
+            yield QAExample(qid=str(qid), question=question, gold_answer=answer, paras=[])

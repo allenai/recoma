@@ -13,7 +13,7 @@ Each [node](/recoma/search/state.py#L10) in the tree has three basic fields:
 
 ```
   tree = []
-  tree.root = Node(input=example.question, target_model=start_model)
+  tree.root = Node(input=example.task, target_model=start_model)
   while tree has open nodes and max limit not reached:
     current_node = first open node in pre-order traversal # think "lowest" unprocessed node
     call current_node.target_model to process the current_node # process here can add new nodes or close the node, if done

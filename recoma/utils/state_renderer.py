@@ -111,15 +111,9 @@ details.small {
 p.entry {
  font-size: 75%
 }
-summary:after {
-    background-color: #fff;
-}
-details[open] summary {
-	background-color: #fff;
-}
 
 summary:hover {
-	background-color: #eee;
+  background-color: #8b8680;
 }
 
 a {

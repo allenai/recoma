@@ -1,6 +1,6 @@
 import json
 
-from recoma.datasets.reader import DatasetReader, Example
+from recoma.datasets.reader import DatasetReader, QAExample
 
 
 @DatasetReader.register("gsm8k")
@@ -18,4 +18,4 @@ class GSM8KReader(DatasetReader):
                 rationale = eg_json["answer"]
                 answer = rationale.split("####")[-1].strip()
                 qid += 1
-                yield Example(qid=str(qid), question=question, gold_answer=answer, paras=[])
+                yield QAExample(qid=str(qid), question=question, gold_answer=answer, paras=[])

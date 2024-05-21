@@ -145,7 +145,7 @@ class SearchState(Tree):
 
     def add_next_step(self, next_step_input: str,
                       next_step_model: str,
-                      current_step_node: SearchNode,
+                      current_step_node: Optional[SearchNode],
                       next_step_input_for_display: Optional[str] = None,
                       metadata: Optional[dict[str, Any]] = None):
         # The default fn argument will be shared across calls, so don't set default value to {}

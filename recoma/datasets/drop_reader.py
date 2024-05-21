@@ -1,7 +1,7 @@
 import json
 from typing import Iterable
 
-from recoma.datasets.reader import DatasetReader, Example
+from recoma.datasets.reader import DatasetReader, QAExample
 
 
 def format_drop_answer(answer_json):
@@ -20,7 +20,7 @@ def format_drop_answer(answer_json):
 @DatasetReader.register("drop")
 class DropReader(DatasetReader):
 
-    def read_examples(self, file: str) -> Iterable[Example]:
+    def read_examples(self, file: str):
         with open(file, 'r') as input_fp:
             input_json = json.load(input_fp)
 
@@ -31,4 +31,4 @@ class DropReader(DatasetReader):
                 qid = qa_pair["query_id"]
                 answer = format_drop_answer(qa_pair["answer"])
                 paras = [para]
-                yield Example(qid=qid, question=question, gold_answer=answer, paras=paras)
+                yield QAExample(qid=qid, question=question, gold_answer=answer, paras=paras)

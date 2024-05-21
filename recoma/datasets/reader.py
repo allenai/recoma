@@ -1,3 +1,4 @@
+import abc
 import random
 from abc import abstractmethod
 from dataclasses import dataclass
@@ -6,12 +7,60 @@ from typing import List, Optional, Iterable
 from recoma.utils.class_utils import RegistrableFromDict
 
 
+class Example(abc.ABC):
+
+    @staticmethod
+    @abstractmethod
+    def fields():
+        raise NotImplementedError
+
+    def get_field(self, field):
+        return getattr(self, field)
+
+    @property
+    @abstractmethod
+    def unique_id(self):
+        raise NotImplementedError
+
+    @property
+    @abstractmethod
+    def task(self):
+        raise NotImplementedError
+
+    @property
+    @abstractmethod
+    def label(self):
+        raise NotImplementedError
+
+
 @dataclass
-class Example:
+class QAExample(Example):
     qid: str
     question: str
     gold_answer: Optional[str]
     paras: List[str]
+
+    @staticmethod
+    def fields():
+        return ["qid", "question", "gold_answer", "paras"]
+
+    @property
+    def unique_id(self):
+        return self.qid
+
+    @property
+    def task(self):
+        return self.question
+
+    @property
+    def label(self):
+        return self.gold_answer
+
+    def __str__(self) -> str:
+        return f"QAExample(qid={self.qid}, \
+                 question={self.question}, \
+                 gold_answer={self.gold_answer}, \
+                 paras={self.paras})"
 
 
 class DatasetReader(RegistrableFromDict):

@@ -19,6 +19,7 @@ class PromptedLMModel(BaseModel):
     be a Jinja template. The LMGenerator is then used to generate the output text and set as the
     output field for the current node and closed.
     """
+
     def __init__(self, prompt_file: str, generator_params, **kwargs):
         super().__init__(**kwargs)
         if prompt_file:
@@ -45,11 +46,12 @@ class PromptedLMModel(BaseModel):
         :param state: current search state
         :return: var to object mapping for prompt template
         """
-        return {
-            "input_str": input_str,
-            "paras": state.example.paras,
-            "question": state.example.question
+        template_params = {
+            "input_str": input_str
         }
+        for field in state.example.fields():
+            template_params[field] = state.example.get_field(field)
+        return template_params
 
     def generate_output(self, state) -> GenerationOutputs:
         """
