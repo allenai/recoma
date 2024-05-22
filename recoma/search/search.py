@@ -1,10 +1,10 @@
-from curses import meta
 import heapq
 import logging
 from dataclasses import dataclass
 
 from recoma.datasets.reader import Example
 from recoma.search.answerfromstate import TailOutputAnswerer, AnswerFromState
+from recoma.search.early_stopping import EarlyStoppingCondition
 from recoma.search.state import SearchState
 from recoma.utils.class_utils import RegistrableFromDict
 
@@ -17,18 +17,25 @@ class ExamplePrediction:
     prediction: str
     final_state: SearchState
 
-
 class SearchAlgo(RegistrableFromDict):
-    def __init__(self, model_list, start_model, renderers=None,
-                 answerer=None, max_search_iters=100,
-                 max_search_depth=100, output_dir=None, **kwargs):
+    def __init__(self, model_list, start_model,
+                 renderers=None, answerer=None, stopping_conditions=None,
+                 output_dir=None, **kwargs):
         super().__init__(**kwargs)
         self.model_list = model_list
         self.answerer = TailOutputAnswerer() if answerer is None \
             else AnswerFromState.from_dict(answerer)
         self.start_model = start_model
-        self.max_search_iters = max_search_iters
-        self.max_search_depth = max_search_depth
+        if stopping_conditions is None:
+            self.stopping_conditions = [
+                EarlyStoppingCondition.from_dict({"type": "max_search_depth"}),
+                EarlyStoppingCondition.from_dict({"type": "max_search_iters"})
+            ]
+        else:
+            self.stopping_conditions = [
+                EarlyStoppingCondition.from_dict(stopping_condition)
+                for stopping_condition in stopping_conditions
+            ]
         self.output_dir = output_dir
         self.renderers = renderers
 
@@ -72,7 +79,8 @@ class BestFirstSearch(SearchAlgo):
 
         # start the search
         iters = 0
-        while iters < self.max_search_iters:
+        # Extremely high limit to catch infinite loops
+        while iters < 1_000_000:
             # pop from heap
             current_state = heapq.heappop(heap)
             logger.debug("\n" + current_state.to_str_tree())
@@ -92,21 +100,26 @@ class BestFirstSearch(SearchAlgo):
             else:
                 logger.debug("Exploring ====> " + current_state.get_open_node().tag)
 
+            iters += 1
             # generate new states
             for new_state in self.execute(current_state):
-                # push onto heap if max depth not reached
-                if new_state.depth() <= self.max_search_depth:
+                # check stopping conditions
+                should_stop = False
+                for stopping_condition in self.stopping_conditions:
+                    if stopping_condition.should_stop(new_state, iters, heap):
+                        should_stop = True
+                        break
+                if not should_stop:
                     heapq.heappush(heap, new_state)
-                else:
-                    logger.warning("!HIT MAX DEPTH!: {}".format(example.unique_id))
+
             # Rather than failing at the beginning of the loop, fail at the end here and return the
             # current state
             if len(heap) == 0:
                 answer = self.answerer.generate_answer(current_state)
                 logger.warning("!EMPTY HEAP!: {}".format(example.unique_id))
                 return ExamplePrediction(example=example, prediction=answer, final_state=current_state)
-            iters += 1
-        logger.warning("!SEARCH FAILED!: {}".format(example.unique_id))
+
+        logger.error("NONE OF THE STOPPING CONDITIONS MET AFTER 1M STEPS!!: {}".format(example.unique_id))
         best_state = heapq.heappop(heap)
         answer = self.answerer.generate_answer(best_state)
         return ExamplePrediction(example=example,

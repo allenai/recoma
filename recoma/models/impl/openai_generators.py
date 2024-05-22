@@ -60,8 +60,6 @@ class OpenAIChatGenerator(LMGenerator):
         generator_args = self.generator_params_to_args(self.generator_params)
         generator_args["messages"] = messages_json
         generator_args["model"] = self.model
-        # remove args that don't apply to OpenAI models
-        del generator_args["best_of"]
 
         if self.use_cache and self.generator_params.temperature == 0:
             function = cached_openai_chat_call
@@ -82,7 +80,6 @@ class OpenAIChatGenerator(LMGenerator):
             state.update_counter("openai.{}.{}".format(
                 self.model, usage_key), count)
 
-        state.update_counter("{}.calls".format(self.model), 1)
         for index, choice in enumerate(response.choices):
             text_response = choice.message.content.lstrip() if choice.message.content else ""
             # no scores in chat mode

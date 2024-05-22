@@ -19,13 +19,12 @@ cache = Cache(os.path.expanduser("~/.cache/litellmcalls"))
 
 @cache.memoize()
 def cached_litellm_call(
-        model, messages, temperature, max_tokens, top_p, logprobs, top_logprobs, best_of,
+        model, messages, temperature, max_tokens, top_p, logprobs, top_logprobs,
         frequency_penalty, presence_penalty, stop, n, seed, response_format
 ):
     return completion(model=model, messages=messages,
                       temperature=temperature,
                       max_tokens=max_tokens,
-                      best_of=best_of,
                       top_p=top_p,
                       logprobs=logprobs,
                       top_logprobs=top_logprobs,
@@ -77,7 +76,6 @@ class LiteLLMGenerator(LMGenerator):
         for usage_key, count in response["usage"].__dict__.items():
             state.update_counter("litellm.{}.{}".format(
                 self.model, usage_key), count)
-        state.update_counter("{}.calls".format(self.model), 1)
 
         generation_outputs = GenerationOutputs(outputs=[], scores=[])
         for index, choice in enumerate(response["choices"]):

@@ -1,5 +1,6 @@
 from copy import deepcopy
 from multiprocessing import Value
+import time
 from typing import Optional, Any, List
 
 from treelib import Tree, Node
@@ -78,17 +79,19 @@ class SearchNode(Node):
 
 class SearchState(Tree):
 
-    def __init__(self, example: Example = None, score=0, data = {},
+    def __init__(self, example: Example = None, score=0, data = {}, init_time = None,
                  **kwargs):
         super().__init__(node_class=SearchNode, **kwargs)
         self.example = example
         self.score = score
         self.data = data
+        self._init_time = time.time() if init_time is None else init_time
 
     def clone(self, identifier=None, with_tree=True, deep=True):
         # Reset the open node as the cloning might reset the identifiers
         return SearchState(example=self.example, score=self.score, data=deepcopy(self.data),
-                           identifier=identifier, deep=deep, tree=self if with_tree else None)
+                           init_time=self._init_time, identifier=identifier, deep=deep,
+                           tree=self if with_tree else None)
 
 
     def update_counter(self, counter_key: str, count: float):

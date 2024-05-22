@@ -8,7 +8,7 @@ from typing import List
 import _jsonnet
 import gradio as gr
 
-from recoma.datasets.reader import Example, DatasetReader, QAExample
+from recoma.datasets.reader import DatasetReader, QAExample
 from recoma.models.core.base_model import BaseModel
 from recoma.search.search import SearchAlgo, ExamplePrediction
 from recoma.utils.class_utils import import_module_and_submodules

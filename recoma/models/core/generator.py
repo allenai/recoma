@@ -19,7 +19,6 @@ class GeneratorParams:
     # needed to ensure new list is created for each param
     stop: list[str] = field(default_factory=lambda: ["\n"])
     num_sequences: int = 1
-    best_of: int = 1
     logprobs: bool = False
     top_logprobs: Optional[int] = None
     seed: Optional[int] = None
@@ -39,7 +38,8 @@ class LMGenerator(RegistrableFromDict):
     and implement the generate method
     """
 
-    def __init__(self, **kwargs):
+    def __init__(self, drop_params=[], **kwargs):
+        self.drop_params = drop_params
         self.generator_params = GeneratorParams(**kwargs)
 
     @abstractmethod
@@ -75,8 +75,7 @@ class LMGenerator(RegistrableFromDict):
             ]
         return messages_json
 
-    @staticmethod
-    def generator_params_to_args(generator_params: GeneratorParams):
+    def generator_params_to_args(self, generator_params: GeneratorParams):
         kwargs = {
             "temperature": generator_params.temperature,
             "max_tokens": generator_params.max_tokens,
@@ -87,11 +86,13 @@ class LMGenerator(RegistrableFromDict):
             "frequency_penalty": generator_params.frequency_penalty,
             "presence_penalty": generator_params.presence_penalty,
             "stop": generator_params.stop,
-            "best_of": generator_params.best_of,
             "seed": generator_params.seed
         }
         if generator_params.json_format:
             kwargs["response_format"] = { "type": "json_object" }
         else:
             kwargs["response_format"] = { "type": "text" }
+
+        for param in self.drop_params:
+            kwargs.pop(param, None)
         return kwargs

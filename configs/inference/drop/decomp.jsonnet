@@ -1,4 +1,4 @@
-local generator_params = import "../common/default_gpt_davinci002.libsonnet";
+local generator_params = import "../common/default_gpt_gpt3.5.libsonnet";
 {
     "models": {
         "decomp_control": {
@@ -37,4 +37,3 @@ local generator_params = import "../common/default_gpt_davinci002.libsonnet";
       "type": "drop"
     }
 }
-
