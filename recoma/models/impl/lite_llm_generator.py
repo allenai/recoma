@@ -17,11 +17,15 @@ litellm.drop_params = True
 cache = Cache(os.path.expanduser("~/.cache/litellmcalls"))
 
 
+cache_hit = True
+
 @cache.memoize()
 def cached_litellm_call(
         model, messages, temperature, max_tokens, top_p, logprobs, top_logprobs,
         frequency_penalty, presence_penalty, stop, n, seed, response_format
 ):
+    global cache_hit
+    cache_hit = False
     return completion(model=model, messages=messages,
                       temperature=temperature,
                       max_tokens=max_tokens,
@@ -56,14 +60,15 @@ class LiteLLMGenerator(LMGenerator):
         generator_args = self.generator_params_to_args(self.generator_params)
         generator_args["messages"] = messages_json
         generator_args["model"] = self.model
-
+        global cache_hit
         if self.use_cache and self.generator_params.temperature == 0:
+            cache_hit = True
             function = cached_litellm_call
         else:
+            cache_hit = False
             function = completion
 
-        response: dict[Any, Any] = self.completion_with_backoff(
-            function=function, **generator_args)
+        response = self.completion_with_backoff(function=function, **generator_args)
 
         try:
             cost = completion_cost(response)
@@ -71,11 +76,14 @@ class LiteLLMGenerator(LMGenerator):
         except:
             # Unknown model
             pass
-
+        if cache_hit:
+            state.update_counter("litellm.{}.cache_hit".format(self.model), 1)
         state.update_counter("litellm.{}.calls".format(self.model), 1)
-        for usage_key, count in response["usage"].__dict__.items():
-            state.update_counter("litellm.{}.{}".format(
-                self.model, usage_key), count)
+
+        for usage_key in ["completion_tokens", "prompt_tokens", "total_tokens"]:
+            if hasattr(response.usage, usage_key):
+                count = getattr(response.usage, usage_key)
+                state.update_counter("litellm.{}.{}".format(self.model, usage_key), count)
 
         generation_outputs = GenerationOutputs(outputs=[], scores=[])
         for index, choice in enumerate(response["choices"]):

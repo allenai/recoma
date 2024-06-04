@@ -34,6 +34,6 @@ local generator_params = import "../common/default_gpt_gpt3.5.libsonnet";
         }
     },
     "reader": {
-      "type": "drop"
+      "type": "drop",
     }
 }

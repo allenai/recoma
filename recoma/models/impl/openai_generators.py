@@ -1,12 +1,8 @@
 import json
 import logging
-from math import log
 import os
-from calendar import c
-from http import client
-from typing import Any
 from litellm import completion_cost
-import openai
+
 from openai.types.chat.chat_completion import ChatCompletion
 from diskcache import Cache
 from tenacity import (before_sleep_log, retry,  # for exponential backoff
@@ -18,13 +14,15 @@ from recoma.search.state import SearchState
 logger = logging.getLogger(__name__)
 
 cache = Cache(os.path.expanduser("~/.cache/gpt3calls"))
-
+cache_hit = True
 
 @cache.memoize(ignore=("client"))
 def cached_openai_chat_call(
         client, model, messages, temperature, max_tokens, top_p, logprobs, top_logprobs,
         frequency_penalty, presence_penalty, stop, n, seed, response_format
 ):
+    global cache_hit
+    cache_hit = False
     return client.chat.completions.create(model=model, messages=messages,
                                           temperature=temperature,
                                           max_tokens=max_tokens,
@@ -61,10 +59,13 @@ class OpenAIChatGenerator(LMGenerator):
         generator_args["messages"] = messages_json
         generator_args["model"] = self.model
 
+        global cache_hit
         if self.use_cache and self.generator_params.temperature == 0:
             function = cached_openai_chat_call
             generator_args["client"] = self.client
+            cache_hit = True
         else:
+            cache_hit = False
             function = self.client.chat.completions.create
 
         response: ChatCompletion = self.completion_with_backoff(function=function, **generator_args)
@@ -74,6 +75,8 @@ class OpenAIChatGenerator(LMGenerator):
         except:
             # Unknown model
             pass
+        if cache_hit:
+            state.update_counter("openai.{}.cache_hit".format(self.model), 1)
         generation_outputs = GenerationOutputs(outputs=[], scores=[])
         state.update_counter("openai.{}.calls".format(self.model), 1)
         for usage_key, count in response.usage.__dict__.items():

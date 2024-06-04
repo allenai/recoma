@@ -17,6 +17,8 @@ from recoma.utils.state_renderer import StateRenderer
 
 logger = logging.getLogger(__name__)
 
+# import litellm
+# litellm.set_verbose=True
 
 @dataclass
 class ConfigurableSystems:
