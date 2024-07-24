@@ -1,4 +1,5 @@
 import argparse
+from copy import deepcopy
 import json
 import logging
 from dataclasses import dataclass
@@ -22,7 +23,7 @@ logger = logging.getLogger(__name__)
 
 @dataclass
 class ConfigurableSystems:
-    source_json: str
+    source_json: dict
     reader: DatasetReader
     search: SearchAlgo
     renderers: List[StateRenderer]
@@ -53,8 +54,10 @@ def build_configurable_systems(config_file, output_dir):
     else:
         with open(config_file, "r") as input_fp:
             config_map = json.load(input_fp)
+    return build_configurable_systems_from_json(config_map, output_dir)
 
-    source_json = config_map
+def build_configurable_systems_from_json(config_map, output_dir):
+    source_json = deepcopy(config_map)
     reader: DatasetReader = DatasetReader.from_dict(config_map["reader"])
     if "renderers" in config_map:
         renderers = [StateRenderer.from_dict(x)

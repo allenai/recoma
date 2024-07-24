@@ -4,6 +4,7 @@ from abc import abstractmethod
 from dataclasses import dataclass
 from typing import List, Optional, Iterable
 
+
 from recoma.utils.class_utils import RegistrableFromDict
 
 
@@ -78,7 +79,7 @@ class DatasetReader(RegistrableFromDict):
         self.sample_p = sample_p
 
     @abstractmethod
-    def read_examples(self, file: str) -> Iterable[Example]:
+    def read_examples(self, file: Optional[str] = None) -> Iterable[Example]:
         """
         All implementations should implement this method to convert files into a stream of Examples
         :param file: input file to read from
@@ -86,7 +87,7 @@ class DatasetReader(RegistrableFromDict):
         """
         raise NotImplementedError
 
-    def get_examples(self, file: str) -> Iterable[Example]:
+    def get_examples(self, file: Optional[str] = None) -> Iterable[Example]:
         """
         Get examples from the input file by first reading them from file and then applying
         filters as defined in the constructor (e.g. top_k, sample_p)
