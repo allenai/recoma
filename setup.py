@@ -25,7 +25,7 @@ def read_reqs_file(path: str) -> List[str]:
 long_description = Path("README.md").read_text(encoding="utf-8")
 setup(
     name="recoma",
-    version="0.0.1",
+    version="0.0.2",
     description="A Python package to reason by communicating with agents",
     long_description=long_description,
     long_description_content_type="text/markdown",  # Optional (see note above)
