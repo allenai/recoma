@@ -5,5 +5,5 @@
     "temperature": 0,
     "top_p": 1,
     "use_cache": false,
-    "stop": ["\n"]
+    "stop": ["<|endoftext|>", "<|start_header_id|>", "\n"]
 }
