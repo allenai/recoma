@@ -23,21 +23,7 @@ def cached_openai_chat_call(
 ):
     global cache_hit
     cache_hit = False
-    # Change argeument to max_completion_tokens, set temperature to 1.0, and remove stop
-    if "o1" in model:
-        return client.chat.completions.create(model=model, messages=messages,
-                                              max_completion_tokens=max_tokens,
-                                              temperature=1.0,
-                                              top_p=top_p,
-                                              logprobs=logprobs,
-                                              top_logprobs=top_logprobs,
-                                              n=n,
-                                              seed=seed,
-                                              frequency_penalty=frequency_penalty,
-                                              presence_penalty=presence_penalty,
-                                              response_format=response_format)
-    else:
-        return client.chat.completions.create(model=model, messages=messages,
+    return client.chat.completions.create(model=model, messages=messages,
                                           temperature=temperature,
                                           max_tokens=max_tokens,
                                           top_p=top_p,
@@ -49,7 +35,6 @@ def cached_openai_chat_call(
                                           frequency_penalty=frequency_penalty,
                                           presence_penalty=presence_penalty,
                                           response_format=response_format)
-
 
 
 @LMGenerator.register("openai_chat")
@@ -83,10 +68,13 @@ class OpenAIChatGenerator(LMGenerator):
             cache_hit = False
             function = self.client.chat.completions.create
 
-        response: ChatCompletion = self.completion_with_backoff(function=function, **generator_args)
         if "o1" in self.model:
-            print(response)
+            # Change argeument to max_completion_tokens, set temperature to 1.0, and remove stop
+            generator_args["max_completion_tokens"] = generator_args.pop("max_tokens")
+            generator_args["temperature"] = 1.0
+            generator_args.pop("stop")
 
+        response: ChatCompletion = self.completion_with_backoff(function=function, **generator_args)
         try:
             cost = completion_cost(response)
             state.update_counter("openai.{}.cost".format(self.model), cost)
