@@ -23,7 +23,21 @@ def cached_openai_chat_call(
 ):
     global cache_hit
     cache_hit = False
-    return client.chat.completions.create(model=model, messages=messages,
+    # Change argeument to max_completion_tokens, set temperature to 1.0, and remove stop
+    if "o1" in model:
+        return client.chat.completions.create(model=model, messages=messages,
+                                              max_completion_tokens=max_tokens,
+                                              temperature=1.0,
+                                              top_p=top_p,
+                                              logprobs=logprobs,
+                                              top_logprobs=top_logprobs,
+                                              n=n,
+                                              seed=seed,
+                                              frequency_penalty=frequency_penalty,
+                                              presence_penalty=presence_penalty,
+                                              response_format=response_format)
+    else:
+        return client.chat.completions.create(model=model, messages=messages,
                                           temperature=temperature,
                                           max_tokens=max_tokens,
                                           top_p=top_p,
@@ -35,6 +49,7 @@ def cached_openai_chat_call(
                                           frequency_penalty=frequency_penalty,
                                           presence_penalty=presence_penalty,
                                           response_format=response_format)
+
 
 
 @LMGenerator.register("openai_chat")
@@ -60,7 +75,7 @@ class OpenAIChatGenerator(LMGenerator):
         generator_args["model"] = self.model
 
         global cache_hit
-        if self.use_cache and self.generator_params.temperature == 0:
+        if self.use_cache and self.generator_params.temperature == 0 and "o1" not in self.model:
             function = cached_openai_chat_call
             generator_args["client"] = self.client
             cache_hit = True
@@ -69,6 +84,9 @@ class OpenAIChatGenerator(LMGenerator):
             function = self.client.chat.completions.create
 
         response: ChatCompletion = self.completion_with_backoff(function=function, **generator_args)
+        if "o1" in self.model:
+            print(response)
+
         try:
             cost = completion_cost(response)
             state.update_counter("openai.{}.cost".format(self.model), cost)
@@ -80,8 +98,9 @@ class OpenAIChatGenerator(LMGenerator):
         generation_outputs = GenerationOutputs(outputs=[], scores=[])
         state.update_counter("openai.{}.calls".format(self.model), 1)
         for usage_key, count in response.usage.__dict__.items():
-            state.update_counter("openai.{}.{}".format(
-                self.model, usage_key), count)
+            if isinstance(count, int) or isinstance(count, float):
+                state.update_counter("openai.{}.{}".format(
+                    self.model, usage_key), count)
 
         for index, choice in enumerate(response.choices):
             text_response = choice.message.content.lstrip() if choice.message.content else ""
